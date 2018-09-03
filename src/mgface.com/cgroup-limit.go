@@ -38,7 +38,11 @@ func main() {
 		os.Exit(-1)
 	} else {
 		log.Printf("fork出来进程的PID(外部命名空间)：%d", cmd.Process.Pid)
-		os.Mkdir(path.Join(cgroupMemoryMount, "testmemorylimit"), 0755)
+		err:=os.Mkdir(path.Join(cgroupMemoryMount, "testmemorylimit"), 0755)
+		if err!=nil {
+			log.Fatal("错误的创建文件,发生错误.%s",err)
+			os.Exit(-1)
+		}
 		//将容器进程加入到这个cgroup
 		ioutil.WriteFile(path.Join(cgroupMemoryMount, "testmemorylimit", "tasks"), []byte(strconv.Itoa(cmd.Process.Pid)), 0644)
 		ioutil.WriteFile(path.Join(cgroupMemoryMount, "testmemorylimit", "memory.limit_in_bytes"), []byte("100m"), 0644)
