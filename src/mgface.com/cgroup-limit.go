@@ -11,7 +11,7 @@ import (
 	"syscall"
 )
 
-const cgroupMemoryMount = "sys/fs/cgroup/memory"
+const cgroupMemoryMount = "/sys/fs/cgroup/memory"
 
 func main() {
 	if os.Args[0] == "/proc/self/exe" {
