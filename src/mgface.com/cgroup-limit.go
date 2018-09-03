@@ -16,7 +16,7 @@ const cgroupMemoryMount = "/sys/fs/cgroup/memory"
 func main() {
 	if os.Args[0] == "/proc/self/exe" {
 		fmt.Printf("当前Pid %d \n", syscall.Getpid())
-		cmd := exec.Command("sh", "-c", "stress --vm-bytes 200m --vm-keep -m 1")
+		cmd := exec.Command("sh", "-c", "stress --vm-bytes 100m --vm-keep -m 1")
 		cmd.SysProcAttr = &syscall.SysProcAttr{}
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
