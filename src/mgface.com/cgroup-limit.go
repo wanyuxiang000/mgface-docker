@@ -33,7 +33,7 @@ func main() {
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
-	if err := cmd.Run(); err != nil {
+	if err := cmd.Start(); err != nil {
 		log.Fatal("发生错误:%s", err)
 		os.Exit(-1)
 	} else {
