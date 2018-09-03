@@ -4,8 +4,6 @@ import (
 	logs "github.com/Sirupsen/logrus"
 	"os"
 	"os/exec"
-	"os/user"
-	"strconv"
 	"syscall"
 )
 
@@ -29,14 +27,6 @@ func main() {
 			},
 		},
 	}
-	user, err := user.Lookup("nobody")
-	if err == nil {
-		logs.Errorf("uid=%s,gid=%s", user.Uid, user.Gid)
-	}
-	uid, _ := strconv.Atoi(user.Uid)
-	gid, _ := strconv.Atoi(user.Gid)
-
-	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uint32(uid), Gid: uint32(gid)}
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
