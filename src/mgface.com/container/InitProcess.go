@@ -38,7 +38,7 @@ func Run(tty bool, command string,res *subsystem.ResouceConfig) {
 	if err := cmd.Start(); err != nil {
 		logrus.Fatal("发生错误:%s", err)
 	}
-	manager:=subsystem.NewCgroupManager("mgface-cgroup")
+	manager:=subsystem.NewCgroupManager("mgface-cgroup1")
 	defer manager.Destory()
 	//设置资源限制
 	manager.Set(res)

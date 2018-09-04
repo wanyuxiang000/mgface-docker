@@ -58,8 +58,8 @@ var runCommand = cli.Command{
 		cmd := ctx.Args().Get(0)
 		tty := ctx.Bool("it")
 		resconfig := &subsystem.ResouceConfig{
-			CpuSet:      ctx.String("cpuset"),
-			CpuShare:    ctx.String("cpushare"),
+			//CpuSet:      ctx.String("cpuset"),
+			//CpuShare:    ctx.String("cpushare"),
 			MemoryLimit: ctx.String("m"),
 		}
 		container.Run(tty, cmd, resconfig)
