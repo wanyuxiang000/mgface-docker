@@ -23,6 +23,7 @@ func (s *MemorySubSyetem) Set(cgroupPath string, res *ResouceConfig) error {
 			}
 		}
 	}
+	return nil
 }
 func (s *MemorySubSyetem) Apply(cgroupPath string, pid int) error {
 	if sub, err := GetCgroupPath(s.Name(), cgroupPath, false); err == nil {
@@ -32,6 +33,7 @@ func (s *MemorySubSyetem) Apply(cgroupPath string, pid int) error {
 	} else {
 		return fmt.Errorf("把PID：%d 添加到task文件失败", pid)
 	}
+	return nil
 
 }
 func (s *MemorySubSyetem) Remove(cgroupPath string) error {
