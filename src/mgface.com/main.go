@@ -5,6 +5,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
 	"mgface.com/container"
+	"mgface.com/subsystem"
 	"os"
 )
 
@@ -36,6 +37,18 @@ var runCommand = cli.Command{
 			Name:  "it",
 			Usage: "启用tty",
 		},
+		cli.StringFlag{
+			Name:  "m",
+			Usage: "内存限制",
+		},
+		cli.StringFlag{
+			Name:  "cpushare",
+			Usage: "cpushare限制",
+		},
+		cli.StringFlag{
+			Name:  "cpuset",
+			Usage: "cpuset限制",
+		},
 	},
 	Action: func(ctx *cli.Context) error {
 		logrus.Infof("获取到参数:%s", ctx.Args)
@@ -44,7 +57,12 @@ var runCommand = cli.Command{
 		}
 		cmd := ctx.Args().Get(0)
 		tty := ctx.Bool("it")
-		container.Run(tty, cmd)
+		resconfig := &subsystem.ResouceConfig{
+			CpuSet:      ctx.String("cpuset"),
+			CpuShare:    ctx.String("cpushare"),
+			MemoryLimit: ctx.String("m"),
+		}
+		container.Run(tty, cmd, resconfig)
 		return nil
 	},
 }

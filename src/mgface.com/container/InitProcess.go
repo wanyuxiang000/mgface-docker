@@ -2,6 +2,7 @@ package container
 
 import (
 	"github.com/Sirupsen/logrus"
+	"mgface.com/subsystem"
 	"os"
 	"os/exec"
 	"syscall"
@@ -32,11 +33,17 @@ func NewParentProcess(tty bool, command string) *exec.Cmd {
 	return cmd
 }
 
-func Run(tty bool, command string) {
+func Run(tty bool, command string,res *subsystem.ResouceConfig) {
 	cmd := NewParentProcess(tty, command)
 	if err := cmd.Start(); err != nil {
 		logrus.Fatal("发生错误:%s", err)
 	}
+	manager:=subsystem.NewCgroupManager("mgface-cgroup")
+	defer manager.Destory()
+	//设置资源限制
+	manager.Set(res)
+	//将容器进程加入到各个subsystem挂载对于的cgroup
+	manager.Apply(cmd.Process.Pid)
 	cmd.Wait()
 	os.Exit(-1)
 }
