@@ -57,7 +57,7 @@ var runCommand = cli.Command{
 		}
 		var cmdArray []string
 		for _, arg := range ctx.Args() {
-			logrus.Infof("获取到参数:%s", ctx.Args)
+			logrus.Infof("获取到参数:%s", arg)
 			cmdArray = append(cmdArray, arg)
 		}
 

@@ -33,7 +33,9 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
-
+	//会外带着这个文件句柄去创建子进程
+	//因为 1 个进程默认会有 3 个文件描述符，分别是标准输入、标准输出、标准错误。这3个
+	//是子进程一创建的时候就会默认带着的，那么外带的这个文件描述符理所当然地就成为了第4个
 	cmd.ExtraFiles = []*os.File{r}
 	return cmd, w
 }
