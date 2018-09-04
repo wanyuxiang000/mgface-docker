@@ -55,14 +55,18 @@ var runCommand = cli.Command{
 		if len(ctx.Args()) < 1 {
 			return fmt.Errorf("错误的容器参数")
 		}
-		cmd := ctx.Args().Get(0)
+		var cmdArray []string
+		for _, arg := range ctx.Args() {
+			cmdArray = append(cmdArray, arg)
+		}
+
 		tty := ctx.Bool("it")
 		resconfig := &subsystem.ResouceConfig{
 			//CpuSet:      ctx.String("cpuset"),
 			//CpuShare:    ctx.String("cpushare"),
 			MemoryLimit: ctx.String("m"),
 		}
-		container.Run(tty, cmd, resconfig)
+		container.Run(tty, cmdArray, resconfig)
 		return nil
 	},
 }

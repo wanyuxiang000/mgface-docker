@@ -5,11 +5,14 @@ import (
 	"mgface.com/subsystem"
 	"os"
 	"os/exec"
+	"strings"
 	"syscall"
 )
 
-func NewParentProcess(tty bool, command string) *exec.Cmd {
-	args := []string{"init", command}
+func NewParentProcess(tty bool) (*exec.Cmd,*os.File) {
+	r,w,_:=os.Pipe()
+
+	args := []string{"init"}
 	cmd := exec.Command("/proc/self/exe", args...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS | syscall.CLONE_NEWNET | syscall.CLONE_NEWUSER | syscall.CLONE_NEWIPC,
@@ -30,11 +33,13 @@ func NewParentProcess(tty bool, command string) *exec.Cmd {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
-	return cmd
+
+	cmd.ExtraFiles = []*os.File{r}
+	return cmd,w
 }
 
-func Run(tty bool, command string,res *subsystem.ResouceConfig) {
-	cmd := NewParentProcess(tty, command)
+func Run(tty bool, command []string,res *subsystem.ResouceConfig) {
+	cmd,writePipe := NewParentProcess(tty)
 	if err := cmd.Start(); err != nil {
 		logrus.Fatal("发生错误:%s", err)
 	}
@@ -44,6 +49,15 @@ func Run(tty bool, command string,res *subsystem.ResouceConfig) {
 	manager.Set(res)
 	//将容器进程加入到各个subsystem挂载对于的cgroup
 	manager.Apply(cmd.Process.Pid)
+
+	sendInitCommand(command,writePipe)
 	cmd.Wait()
 	os.Exit(-1)
+}
+
+func sendInitCommand(comArray []string,writePipe *os.File){
+	command:=strings.Join(comArray," ")
+	logrus.Infof("所有的命令:%s",command)
+	writePipe.WriteString(command)
+	writePipe.Close()
 }
