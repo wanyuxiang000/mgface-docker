@@ -11,13 +11,13 @@ import (
 )
 
 func RunContainerInitProcess() error {
-	cmdArray:=readUserCommand()
+	cmdArray := readUserCommand()
 	logrus.Infof("接收到的命令:%s", cmdArray)
 	if cmdArray == nil || len(cmdArray) == 0 {
 		return fmt.Errorf("Run container get user command error, cmdArray is nil")
 	}
 
-	path,err:=exec.LookPath(cmdArray[0])
+	path, err := exec.LookPath(cmdArray[0])
 
 	if err != nil {
 		logrus.Errorf("Exec loop path error %v", err)

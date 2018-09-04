@@ -16,5 +16,7 @@ type Subsytem interface {
 var (
 	SybsystemsIns = []Subsytem{
 		&MemorySubSyetem{},
+		&CpuSubSyetem{},
+		&CpusetSubSystem{},
 	}
 )

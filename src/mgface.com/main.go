@@ -51,21 +51,23 @@ var runCommand = cli.Command{
 		},
 	},
 	Action: func(ctx *cli.Context) error {
-		logrus.Infof("获取到参数:%s", ctx.Args)
+
 		if len(ctx.Args()) < 1 {
 			return fmt.Errorf("错误的容器参数")
 		}
 		var cmdArray []string
 		for _, arg := range ctx.Args() {
+			logrus.Infof("获取到参数:%s", ctx.Args)
 			cmdArray = append(cmdArray, arg)
 		}
 
 		tty := ctx.Bool("it")
 		resconfig := &subsystem.ResouceConfig{
-			//CpuSet:      ctx.String("cpuset"),
-			//CpuShare:    ctx.String("cpushare"),
+			CpuSet:      ctx.String("cpuset"),
+			CpuShare:    ctx.String("cpushare"),
 			MemoryLimit: ctx.String("m"),
 		}
+		logrus.Infof("入参:%s,命令:%s", tty, cmdArray)
 		container.Run(tty, cmdArray, resconfig)
 		return nil
 	},
