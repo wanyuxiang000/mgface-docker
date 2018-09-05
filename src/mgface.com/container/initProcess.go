@@ -55,15 +55,23 @@ func pivotRoot(root string) error {
 		return fmt.Errorf("挂载rootfs给自己发生错误:%v", err)
 	}
 	pivotDir := filepath.Join(root, ".pivot_root")
-	os.Mkdir(pivotDir, 0777)
+	if err:=os.Mkdir(pivotDir, 0777);err!=nil{
+		return err
+	}
 	//pivotRoot把当前进程的root系统移动到putold文件夹，然后让new_root成为新root的文件系统
-	syscall.PivotRoot(root, pivotDir)
+	if err:=syscall.PivotRoot(root, pivotDir);err!=nil{
+		return fmt.Errorf("pivot_root %v",err)
+	}
 
-	syscall.Chdir("/")
+	if err:=syscall.Chdir("/");err!=nil{
+		return fmt.Errorf("chdir / %v",err)
+	}
 
 	pivotDir = filepath.Join("/", ".pivot_root")
 
-	syscall.Unmount(pivotDir, syscall.MNT_DETACH)
+	if err:=syscall.Unmount(pivotDir, syscall.MNT_DETACH);err!=nil{
+		return fmt.Errorf("umount pivot_root dir %v",err)
+	}
 
 	return nil//os.Remove(pivotDir)
 
