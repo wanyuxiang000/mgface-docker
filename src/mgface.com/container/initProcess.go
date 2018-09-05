@@ -55,6 +55,7 @@ func pivotRoot(root string) error {
 		return fmt.Errorf("挂载rootfs给自己发生错误:%v", err)
 	}
 	pivotDir := filepath.Join(root, ".pivot_root")
+	fmt.Println("pivotDir->",pivotDir)
 	if err:=os.Mkdir(pivotDir, 0777);err!=nil{
 		return err
 	}
