@@ -65,7 +65,7 @@ func pivotRoot(root string) error {
 
 	syscall.Unmount(pivotDir, syscall.MNT_DETACH)
 
-	return os.Remove(pivotDir)
+	return nil//os.Remove(pivotDir)
 
 }
 
