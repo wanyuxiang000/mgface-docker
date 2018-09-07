@@ -96,7 +96,7 @@ func setUpMount() {
 	if err := syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), ""); err != nil {
 		fmt.Println("mount proc 发生错误:", err)
 	}
-	if err := syscall.Mount("tmpfs", "/dev", "tempfs", syscall.MS_NOSUID|syscall.MS_STRICTATIME, "mode=755"); err != nil {
+	if err := syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID|syscall.MS_STRICTATIME, "mode=755"); err != nil {
 		fmt.Println("mount tmpfs 发生错误:", err)
 	}
 }
