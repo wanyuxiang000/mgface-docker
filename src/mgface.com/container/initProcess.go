@@ -54,6 +54,7 @@ func pivotRoot(root string) error {
 	if err := syscall.Mount(root, root, "bind", syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
 		return fmt.Errorf("挂载rootfs给自己发生错误:%v", err)
 	}
+	syscall.Unshare(syscall.CLONE_NEWNS)
 	pivotDir := filepath.Join(root, ".pivot_root")
 	fmt.Println("pivotDir->", pivotDir)
 	if err := os.Mkdir(pivotDir, 0777); err != nil {
