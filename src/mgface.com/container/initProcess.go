@@ -51,12 +51,12 @@ func readUserCommand() []string {
 }
 
 func pivotRoot(root string) error {
-	if err := syscall.Mount(root, root, "bind", syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
+	if err := syscall.Mount(root, root, "", syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
 		return fmt.Errorf("挂载rootfs给自己发生错误:%v", err)
 	}
 	pivotDir := filepath.Join(root, ".pivot_root")
 	fmt.Println("pivotDir->",pivotDir)
-	if err:=os.Mkdir(pivotDir, 0777);err!=nil{
+	if err:=os.MkdirAll(pivotDir, 0700);err!=nil{
 		return err
 	}
 	//pivotRoot把当前进程的root系统移动到putold文件夹，然后让new_root成为新root的文件系统
