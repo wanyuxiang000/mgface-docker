@@ -12,9 +12,10 @@ import (
 func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
 	r, w, _ := os.Pipe()
 
-	cmd := exec.Command("/proc/self/exe", "init")
+	args := []string{"init"}
+	cmd := exec.Command("/proc/self/exe", args...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS | syscall.CLONE_NEWNET | syscall.CLONE_NEWIPC, //| syscall.CLONE_NEWUSER
+		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS | syscall.CLONE_NEWNET  | syscall.CLONE_NEWIPC,//| syscall.CLONE_NEWUSER
 	}
 
 	//相当于 cmd 进程认为自己是以 root 执行的，但其实最终的操作受制于 宿主机0(root)这个用户
