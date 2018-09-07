@@ -51,10 +51,9 @@ func readUserCommand() []string {
 }
 
 func pivotRoot(root string) error {
-	if err := syscall.Mount(root, root, "bind", syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
+	if err := syscall.Mount(root, root, "bind", syscall.MS_PRIVATE|syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
 		return fmt.Errorf("挂载rootfs给自己发生错误:%v", err)
 	}
-	syscall.Unshare(syscall.CLONE_NEWNS)
 	pivotDir := filepath.Join(root, ".pivot_root")
 	fmt.Println("pivotDir->", pivotDir)
 	if err := os.Mkdir(pivotDir, 0777); err != nil {
@@ -82,6 +81,7 @@ func pivotRoot(root string) error {
 func setUpMount() {
 	pwd, _ := os.Getwd()
 	logrus.Infof("当前的location: %s", pwd)
+	syscall.Mount("", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, "")
 	err := pivotRoot(pwd)
 	logrus.Infof("pivotRoot切换->%v", err)
 	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
