@@ -51,15 +51,21 @@ func readUserCommand() []string {
 }
 
 func pivotRoot(root string) error {
+	/**
+	  为了使当前root的老 root 和新 root 不在同一个文件系统下，我们把root重新mount了一次
+	  bind mount是把相同的内容换了一个挂载点的挂载方法
+	*/
 	if err := syscall.Mount(root, root, "bind", syscall.MS_PRIVATE|syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
 		return fmt.Errorf("挂载rootfs给自己发生错误:%v", err)
 	}
+	// 创建 rootfs/.pivot_root 存储 old_root
 	pivotDir := filepath.Join(root, ".pivot_root")
 	fmt.Println("pivotDir->", pivotDir)
 	if err := os.Mkdir(pivotDir, 0777); err != nil {
 		return err
 	}
 	//pivotRoot把当前进程的root系统移动到putold文件夹，然后让new_root成为新root的文件系统
+	// 挂载点现在依然可以在mount命令中看到
 	if err := syscall.PivotRoot(root, pivotDir); err != nil {
 		return fmt.Errorf("pivot_root %v", err)
 	}
@@ -69,7 +75,7 @@ func pivotRoot(root string) error {
 	}
 
 	pivotDir = filepath.Join("/", ".pivot_root")
-
+	// umount rootfs/.pivot_root
 	if err := syscall.Unmount(pivotDir, syscall.MNT_DETACH); err != nil {
 		return fmt.Errorf("umount pivot_root dir %v", err)
 	}
@@ -81,6 +87,8 @@ func pivotRoot(root string) error {
 func setUpMount() {
 	pwd, _ := os.Getwd()
 	logrus.Infof("当前的location: %s", pwd)
+	//makes the mount namespace works properly on my archlinux computer, systemd made "/" mounted as shared by default.
+	//systemd加入linux之后, mount namespace 就变成 shared by default, 所以你必须显示声明你要这个新的mount namespace独立
 	syscall.Mount("", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, "")
 	err := pivotRoot(pwd)
 	logrus.Infof("pivotRoot切换->%v", err)
