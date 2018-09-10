@@ -67,7 +67,7 @@ var runCommand = cli.Command{
 			CpuShare:    ctx.String("cpushare"),
 			MemoryLimit: ctx.String("m"),
 		}
-		logrus.Infof("入参:%s,命令:%s", tty, cmdArray)
+		logrus.Infof("入参:%t,命令:%s", tty, cmdArray)
 		container.Run(tty, cmdArray, resconfig)
 		return nil
 	},

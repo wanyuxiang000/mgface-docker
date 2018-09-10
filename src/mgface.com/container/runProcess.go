@@ -2,11 +2,13 @@ package container
 
 import (
 	"github.com/Sirupsen/logrus"
+	"mgface.com/aufs"
 	"mgface.com/subsystem"
 	"os"
 	"os/exec"
 	"strings"
 	"syscall"
+	"time"
 )
 
 func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
@@ -39,7 +41,8 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
 	cmd.ExtraFiles = []*os.File{r}
 
 	//设置cmd的目录
-	cmd.Dir = "/root/busybox"
+	cmd.Dir = "/root/mnt"
+	aufs.NewWorkspace("/root","/root/mnt")
 	return cmd, w
 }
 
@@ -48,7 +51,7 @@ func Run(tty bool, command []string, res *subsystem.ResouceConfig) {
 	if err := cmd.Start(); err != nil {
 		logrus.Fatal("发生错误:%s", err)
 	}
-	manager := subsystem.NewCgroupManager("mgface-cgroup1")
+	manager := subsystem.NewCgroupManager("mgface-cgroup")
 	defer manager.Destory()
 	//设置资源限制
 	manager.Set(res)
@@ -57,7 +60,8 @@ func Run(tty bool, command []string, res *subsystem.ResouceConfig) {
 
 	sendInitCommand(command, writePipe)
 	cmd.Wait()
-	os.Exit(-1)
+	logrus.Infof("退出当前进程:%s",time.Now().Format("2006-01-02 15:04:05"))
+	os.Exit(0)
 }
 
 func sendInitCommand(comArray []string, writePipe *os.File) {
