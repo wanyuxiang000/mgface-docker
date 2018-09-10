@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 )
+
 //NewWorkspace("/root","/root/mnt")
 func NewWorkspace(rootURL string, mntURL string) {
 	CreateReadOnlyLayer(rootURL)
@@ -24,6 +25,7 @@ func CreateReadOnlyLayer(rootURL string) {
 		if err := os.Mkdir(busyboxUrl, 0777); err != nil {
 			logrus.Errorf("创建目录%s发生异常%v", busyboxUrl, err)
 		}
+		logrus.Infof("目录:%s,tar包:%s", busyboxUrl, busyboxTarURL)
 		exec.Command("tar", "-xvf", busyboxTarURL, "-C", busyboxUrl).CombinedOutput()
 	}
 }
@@ -36,6 +38,7 @@ func CreateWriteLayer(rootRUL string) {
 func CreateMountPoint(rootURL string, mntURL string) {
 	os.Mkdir(mntURL, 0777)
 	dirs := "dirs=" + rootURL + "/writeLayer:" + rootURL + "/busybox"
+	logrus.Infof("mount->dirs：%s",dirs)
 	cmd := exec.Command("mount", "-t", "aufs", "-o", dirs, "none", mntURL)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
