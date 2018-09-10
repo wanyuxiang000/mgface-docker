@@ -46,7 +46,6 @@ func CreateMountPoint(rootURL string, mntURL string) {
 	if err := cmd.Run(); err != nil {
 		logrus.Fatalf("发错致命错误:%v", err)
 	}
-	os.Exit(-1)
 }
 
 func PathExit(path string) (bool, error) {
