@@ -61,6 +61,8 @@ func Run(tty bool, command []string, res *subsystem.ResouceConfig) {
 	sendInitCommand(command, writePipe)
 	cmd.Wait()
 	logrus.Infof("退出当前进程:%s",time.Now().Format("2006-01-02 15:04:05"))
+	logrus.Infof("开始清理环境...")
+	aufs.DeleteWorkSpace("/root","/root/mnt")
 	os.Exit(0)
 }
 

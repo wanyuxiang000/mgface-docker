@@ -38,7 +38,7 @@ func CreateWriteLayer(rootRUL string) {
 func CreateMountPoint(rootURL string, mntURL string) {
 	os.Mkdir(mntURL, 0777)
 	dirs := "dirs=" + rootURL + "/writeLayer:" + rootURL + "/busybox"
-	logrus.Infof("mount->dirs：%s",dirs)
+	logrus.Infof("mount->dirs：%s", dirs)
 	cmd := exec.Command("mount", "-t", "aufs", "-o", dirs, "none", mntURL)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
@@ -57,4 +57,24 @@ func PathExit(path string) (bool, error) {
 		return false, nil
 	}
 	return false, nil
+}
+
+func DeleteWorkSpace(rootURL string, mntURL string) {
+	DeleteMountPoint(rootURL, mntURL)
+	DeleteWriteLayer(rootURL)
+}
+
+func DeleteMountPoint(rootURL string, mntURL string) {
+	cmd := exec.Command("umount", mntURL)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Run()
+	os.RemoveAll(rootURL+"/busybox")
+	os.RemoveAll(mntURL)
+}
+
+func DeleteWriteLayer(rootURL string) {
+	writeURL := rootURL + "/writeLayer/"
+	os.RemoveAll(writeURL)
 }
