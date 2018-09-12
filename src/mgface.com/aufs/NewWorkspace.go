@@ -92,9 +92,9 @@ func DeleteWorkSpace(rootURL string, mntURL string, volume string) {
 		if len(volumeUrl) == 2 && volumeUrl[0] != "" && volumeUrl[1] != "" {
 			DeleteMountPointWithVolume(rootURL, mntURL, volumeUrl)
 		}
-	} else {
-		DeleteMountPoint(rootURL, mntURL)
 	}
+
+	DeleteMountPoint(rootURL, mntURL)
 	DeleteWriteLayer(rootURL)
 
 }
