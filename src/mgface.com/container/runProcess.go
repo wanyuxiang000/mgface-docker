@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool,volume string) (*exec.Cmd, *os.File) {
 	r, w, _ := os.Pipe()
 	args := []string{"init"}
 	cmd := exec.Command("/proc/self/exe", args...)
@@ -42,12 +42,12 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
 
 	//设置cmd的目录
 	cmd.Dir = "/root/mnt"
-	aufs.NewWorkspace("/root","/root/mnt")
+	aufs.NewWorkspace("/root","/root/mnt",volume)
 	return cmd, w
 }
 
-func Run(tty bool, command []string, res *subsystem.ResouceConfig) {
-	cmd, writePipe := NewParentProcess(tty)
+func Run(tty bool, command []string, res *subsystem.ResouceConfig,volume string) {
+	cmd, writePipe := NewParentProcess(tty,volume)
 	if err := cmd.Start(); err != nil {
 		logrus.Fatal("发生错误:%s", err)
 	}
@@ -62,7 +62,7 @@ func Run(tty bool, command []string, res *subsystem.ResouceConfig) {
 	cmd.Wait()
 	logrus.Infof("退出当前进程:%s",time.Now().Format("2006-01-02 15:04:05"))
 	logrus.Infof("开始清理环境...")
-	aufs.DeleteWorkSpace("/root","/root/mnt")
+	aufs.DeleteWorkSpace("/root","/root/mnt",volume)
 	os.Exit(0)
 }
 

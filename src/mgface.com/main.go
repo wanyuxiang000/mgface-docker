@@ -49,6 +49,10 @@ var runCommand = cli.Command{
 			Name:  "cpuset",
 			Usage: "cpuset限制",
 		},
+		cli.StringFlag{
+			Name:"v",
+			Usage:"volume",
+		},
 	},
 	Action: func(ctx *cli.Context) error {
 
@@ -68,7 +72,9 @@ var runCommand = cli.Command{
 			MemoryLimit: ctx.String("m"),
 		}
 		logrus.Infof("入参:%t,命令:%s", tty, cmdArray)
-		container.Run(tty, cmdArray, resconfig)
+		//获得volume配置
+		volume:=ctx.String("v")
+		container.Run(tty, cmdArray, resconfig,volume)
 		return nil
 	},
 }
