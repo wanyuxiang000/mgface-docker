@@ -38,7 +38,7 @@ var commitCommand = cli.Command{
 			return fmt.Errorf("错误的容器名称")
 		}
 		imageName:=context.Args().Get(0)
-		commitContainer(imageName)
+		container.CommitContainer(imageName)
 		return nil
 	},
 }
