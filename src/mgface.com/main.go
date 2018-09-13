@@ -18,6 +18,7 @@ func main() {
 	app.Commands = []cli.Command{
 		runCommand,
 		initCommand,
+		commitCommand,
 	}
 	app.Before = func(context *cli.Context) error {
 		logrus.SetFormatter(&logrus.JSONFormatter{})
@@ -27,6 +28,19 @@ func main() {
 	if err := app.Run(os.Args); err != nil {
 		logrus.Fatal(err)
 	}
+}
+
+var commitCommand = cli.Command{
+	Name:"commit",
+	Usage:"提交一个容器成为新镜像",
+	Action: func(context *cli.Context) error{
+		if len(context.Args())<1 {
+			return fmt.Errorf("错误的容器名称")
+		}
+		imageName:=context.Args().Get(0)
+		commitContainer(imageName)
+		return nil
+	},
 }
 
 var runCommand = cli.Command{
