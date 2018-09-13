@@ -35,7 +35,6 @@ func MountVolume(rootURL, mntURL string, volumeUrls []string) {
 	cmd := exec.Command("mount", "-t", "aufs", "-o", dirs, "none", containerVolumeURL)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
 	if err := cmd.Run(); err != nil {
 		logrus.Errorf("mount volume 错误.%v", err)
 	}
@@ -88,13 +87,15 @@ func PathExit(path string) (bool, error) {
 
 func DeleteWorkSpace(rootURL string, mntURL string, volume string) {
 	if volume != "" {
-		volumeUrl := strings.Split(volume, ",")
+		volumeUrl := strings.Split(volume, ":")
 		if len(volumeUrl) == 2 && volumeUrl[0] != "" && volumeUrl[1] != "" {
 			DeleteMountPointWithVolume(rootURL, mntURL, volumeUrl)
+		}else {
+			DeleteMountPoint(rootURL, mntURL)
 		}
+	}else{
+		DeleteMountPoint(rootURL, mntURL)
 	}
-
-	DeleteMountPoint(rootURL, mntURL)
 	DeleteWriteLayer(rootURL)
 
 }
@@ -102,22 +103,24 @@ func DeleteWorkSpace(rootURL string, mntURL string, volume string) {
 func DeleteMountPointWithVolume(rootURL string, mntURL string, volumeURL []string) {
 	containerUrl := mntURL + volumeURL[1]
 	cmd := exec.Command("umount", containerUrl)
-	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		logrus.Infof("umount失败:%v", err)
 	}
-	os.RemoveAll(containerUrl)
 
 	//卸载整个容器系统的挂载点
-	//cmd = exec.Command("umount", mntURL)
-	//cmd.Stdout = os.Stdout
-	//cmd.Stderr = os.Stderr
-	//cmd.Run()
-	//
-	//logrus.Infof("删除容器文件系统的挂载点...")
-	//os.RemoveAll(mntURL)
+	cmd = exec.Command("umount", mntURL)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err:=cmd.Run();err!=nil{
+		logrus.Infof("umount 失败...%v",err)
+	}
+
+	logrus.Infof("删除容器文件系统的挂载点...")
+	if err := os.RemoveAll(mntURL); err != nil {
+		logrus.Infof("Remove mountpoint dir %s error %v", mntURL, err)
+	}
 }
 
 func DeleteMountPoint(rootURL string, mntURL string) {
@@ -128,7 +131,7 @@ func DeleteMountPoint(rootURL string, mntURL string) {
 	if err := cmd.Run(); err != nil {
 		logrus.Infof("umount发生异常:%v", err)
 	}
-	os.RemoveAll(rootURL + "/busybox")
+	//os.RemoveAll(rootURL + "/busybox")
 	os.RemoveAll(mntURL)
 }
 
