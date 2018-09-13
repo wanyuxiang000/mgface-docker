@@ -90,18 +90,17 @@ func DeleteWorkSpace(rootURL string, mntURL string, volume string) {
 		volumeUrl := strings.Split(volume, ":")
 		if len(volumeUrl) == 2 && volumeUrl[0] != "" && volumeUrl[1] != "" {
 			DeleteMountPointWithVolume(rootURL, mntURL, volumeUrl)
-		}else {
-			DeleteMountPoint(rootURL, mntURL)
 		}
-	}else{
-		DeleteMountPoint(rootURL, mntURL)
 	}
+
+	DeleteMountPoint(rootURL, mntURL)
 	DeleteWriteLayer(rootURL)
 
 }
 
 func DeleteMountPointWithVolume(rootURL string, mntURL string, volumeURL []string) {
 	containerUrl := mntURL + volumeURL[1]
+	logrus.Infof("1)卸载容器%v挂载点.",containerUrl)
 	cmd := exec.Command("umount", containerUrl)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -109,21 +108,22 @@ func DeleteMountPointWithVolume(rootURL string, mntURL string, volumeURL []strin
 		logrus.Infof("umount失败:%v", err)
 	}
 
-	//卸载整个容器系统的挂载点
-	cmd = exec.Command("umount", mntURL)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err:=cmd.Run();err!=nil{
-		logrus.Infof("umount 失败...%v",err)
-	}
-
-	logrus.Infof("删除容器文件系统的挂载点...")
-	if err := os.RemoveAll(mntURL); err != nil {
-		logrus.Infof("Remove mountpoint dir %s error %v", mntURL, err)
-	}
+	////卸载整个容器系统的挂载点
+	//cmd = exec.Command("umount", mntURL)
+	//cmd.Stdout = os.Stdout
+	//cmd.Stderr = os.Stderr
+	//if err:=cmd.Run();err!=nil{
+	//	logrus.Infof("umount 失败...%v",err)
+	//}
+	//
+	//logrus.Infof("删除容器文件系统的挂载点...")
+	//if err := os.RemoveAll(mntURL); err != nil {
+	//	logrus.Infof("Remove mountpoint dir %s error %v", mntURL, err)
+	//}
 }
 
 func DeleteMountPoint(rootURL string, mntURL string) {
+	logrus.Infof("2)卸载%v挂载点.",mntURL)
 	cmd := exec.Command("umount", mntURL)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -131,11 +131,12 @@ func DeleteMountPoint(rootURL string, mntURL string) {
 	if err := cmd.Run(); err != nil {
 		logrus.Infof("umount发生异常:%v", err)
 	}
-	//os.RemoveAll(rootURL + "/busybox")
+	logrus.Infof("删除容器文件系统[%v].",mntURL)
 	os.RemoveAll(mntURL)
 }
 
 func DeleteWriteLayer(rootURL string) {
-	writeURL := rootURL + "/writeLayer/"
+	writeURL := rootURL + "/writeLayer"
+	logrus.Infof("3)删除%v可写层.",writeURL)
 	os.RemoveAll(writeURL)
 }
