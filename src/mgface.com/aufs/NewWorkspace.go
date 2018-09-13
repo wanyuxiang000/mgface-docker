@@ -105,16 +105,19 @@ func DeleteMountPointWithVolume(rootURL string, mntURL string, volumeURL []strin
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Run()
+	if err := cmd.Run(); err != nil {
+		logrus.Infof("umount失败:%v", err)
+	}
+	os.RemoveAll(containerUrl)
 
 	//卸载整个容器系统的挂载点
-	cmd = exec.Command("umount", mntURL)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Run()
-
-	logrus.Infof("删除容器文件系统的挂载点...")
-	os.RemoveAll(mntURL)
+	//cmd = exec.Command("umount", mntURL)
+	//cmd.Stdout = os.Stdout
+	//cmd.Stderr = os.Stderr
+	//cmd.Run()
+	//
+	//logrus.Infof("删除容器文件系统的挂载点...")
+	//os.RemoveAll(mntURL)
 }
 
 func DeleteMountPoint(rootURL string, mntURL string) {
@@ -122,7 +125,9 @@ func DeleteMountPoint(rootURL string, mntURL string) {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Run()
+	if err := cmd.Run(); err != nil {
+		logrus.Infof("umount发生异常:%v", err)
+	}
 	os.RemoveAll(rootURL + "/busybox")
 	os.RemoveAll(mntURL)
 }
