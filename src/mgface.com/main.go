@@ -42,7 +42,6 @@ var commitCommand = cli.Command{
 		return nil
 	},
 }
-
 var runCommand = cli.Command{
 	Name:  "run",
 	Usage: "创建一个容器使用cgroup和namespace,指令为docker run -it [command]",
@@ -67,6 +66,10 @@ var runCommand = cli.Command{
 			Name:"v",
 			Usage:"volume",
 		},
+		cli.BoolFlag{
+			Name:"d",
+			Usage:"detach container",
+		},
 	},
 	Action: func(ctx *cli.Context) error {
 
@@ -80,6 +83,14 @@ var runCommand = cli.Command{
 		}
 
 		tty := ctx.Bool("it")
+
+		detach:=ctx.Bool("d")
+
+		if detach && tty {
+			logrus.Errorf("-it 和 -d 不能同时存在.")
+			os.Exit(-1)
+		}
+
 		resconfig := &subsystem.ResouceConfig{
 			CpuSet:      ctx.String("cpuset"),
 			CpuShare:    ctx.String("cpushare"),
