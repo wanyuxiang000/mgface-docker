@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 	"syscall"
+	"time"
 )
 
 func NewParentProcess(tty bool,volume string) (*exec.Cmd, *os.File) {
@@ -46,7 +47,7 @@ func NewParentProcess(tty bool,volume string) (*exec.Cmd, *os.File) {
 	return cmd, w
 }
 
-func Run(tty bool, command []string, res *subsystem.ResouceConfig,volume string) {
+func Run(tty bool, command []string, res *subsystem.ResouceConfig,volume string,containerName string) {
 	parent, writePipe := NewParentProcess(tty,volume)
 	if err := parent.Start(); err != nil {
 		logrus.Fatal("发生错误:%s", err)
@@ -63,10 +64,10 @@ func Run(tty bool, command []string, res *subsystem.ResouceConfig,volume string)
 	if tty {
 		parent.Wait()
 	}
-	//logrus.Infof("退出当前进程:%s",time.Now().Format("2006-01-02 15:04:05"))
-	//logrus.Infof("开始清理环境...")
-	//aufs.DeleteWorkSpace("/root","/root/mnt",volume)
-	//os.Exit(0)
+	logrus.Infof("退出当前进程:%s",time.Now().Format("2006-01-02 15:04:05"))
+	logrus.Infof("开始清理环境...")
+	aufs.DeleteWorkSpace("/root","/root/mnt",volume)
+	os.Exit(0)
 }
 
 func sendInitCommand(comArray []string, writePipe *os.File) {

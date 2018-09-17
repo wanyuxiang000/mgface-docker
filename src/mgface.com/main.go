@@ -70,6 +70,10 @@ var runCommand = cli.Command{
 			Name:"d",
 			Usage:"detach container",
 		},
+		cli.StringFlag{
+			Name:"name",
+			Usage:"指定容器名称.",
+		},
 	},
 	Action: func(ctx *cli.Context) error {
 
@@ -86,6 +90,8 @@ var runCommand = cli.Command{
 
 		detach:=ctx.Bool("d")
 
+		containerName:=ctx.String("name")
+
 		if detach && tty {
 			logrus.Errorf("-it 和 -d 不能同时存在.")
 			os.Exit(-1)
@@ -99,7 +105,7 @@ var runCommand = cli.Command{
 		logrus.Infof("入参:%t,命令:%s", tty, cmdArray)
 		//获得volume配置
 		volume:=ctx.String("v")
-		container.Run(tty, cmdArray, resconfig,volume)
+		container.Run(tty, cmdArray, resconfig,volume,containerName)
 		return nil
 	},
 }
