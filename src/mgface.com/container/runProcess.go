@@ -41,7 +41,7 @@ func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd,
 		os.MkdirAll(dirURL, 0622)
 		stdLogFile := dirURL + containerInfo.ContainerLog
 		stdout, _ := os.Create(stdLogFile)
-		logrus.Infof("生成容器:%s的日志文件:%s", stdout)
+		logrus.Infof("生成容器:%s的日志文件:%s", containerName, stdLogFile)
 		cmd.Stdout = stdout
 	}
 	//会外带着这个文件句柄去创建子进程
