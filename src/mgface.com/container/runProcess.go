@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd, *os.File) {
 	r, w, _ := os.Pipe()
 	args := []string{"init"}
 	cmd := exec.Command("/proc/self/exe", args...)
@@ -36,6 +36,13 @@ func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+	} else {
+		dirURL := fmt.Sprintf(containerInfo.DefaultInfoLocation, containerName)
+		os.MkdirAll(dirURL, 0622)
+		stdLogFile := dirURL + containerInfo.ContainerLog
+		stdout, _ := os.Create(stdLogFile)
+		logrus.Infof("生成容器:%s的日志文件:%s", stdout)
+		cmd.Stdout = stdout
 	}
 	//会外带着这个文件句柄去创建子进程
 	//因为 1 个进程默认会有 3 个文件描述符，分别是标准输入、标准输出、标准错误。这3个
@@ -49,13 +56,15 @@ func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
 }
 
 func Run(tty bool, command []string, res *subsystem.ResouceConfig, volume string, containerName string) {
-	parent, writePipe := NewParentProcess(tty, volume)
+
+	containerName, id := containerInfo.GetContainerName(containerName)
+	parent, writePipe := NewParentProcess(tty, volume, containerName)
 	if err := parent.Start(); err != nil {
 		logrus.Fatal("发生错误:%s", err)
 	}
 
 	//记录容器信息
-	containerName, _ = containerInfo.RecordContainerInfo(parent.Process.Pid, command, containerName)
+	containerInfo.RecordContainerInfo(parent.Process.Pid, command, containerName, id)
 
 	manager := subsystem.NewCgroupManager("mgface-cgroup")
 	defer manager.Destory()

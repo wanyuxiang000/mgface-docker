@@ -22,17 +22,26 @@ const (
 	RUNNING             = "running"
 	STOP                = "stopped"
 	Exit                = "exited"
-	DefaultInfoLocation = "/var/mgface-docker/%s/"
+	DefaultInfoLocation = "/var/run/mgface-docker/%s/"
 	ConfigName          = "config.json"
+	ContainerLog        = "container.log"
 )
 
-func RecordContainerInfo(containerPID int, commandArray []string, containerName string) (string, error) {
+func GetContainerName(containerName string) (string,string) {
 	id := randStrinByte(10)
-	createTime := time.Now().Format("2006-01-02 15:04:05")
-	command := strings.Join(commandArray, ",")
 	if containerName == "" {
 		containerName = id
 	}
+	return containerName,id
+}
+
+func RecordContainerInfo(containerPID int, commandArray []string, containerName string,id string) (string, error) {
+	//id := randStrinByte(10)
+	createTime := time.Now().Format("2006-01-02 15:04:05")
+	command := strings.Join(commandArray, ",")
+	//if containerName == "" {
+	//	containerName = id
+	//}
 
 	containerInfo := &ContainerInfo{
 		Pid:         strconv.Itoa(containerPID),
