@@ -44,8 +44,9 @@ func listContainers() {
 		containers = append(containers, tmp)
 	}
 
-	//打印信息
 	w := tabwriter.NewWriter(os.Stdout, 12, 1, 3, ' ', 0)
+	//打印信息
+	fmt.Fprintf(w, "ID\t容器名称\tPID\t状态\t命令\t创建时间\t\n")
 	for _, cinfo := range containers {
 		fmt.Fprintf(w,
 			"%s\t%s\t%s\t%s\t%s\t%s\t\n",
@@ -56,7 +57,7 @@ func listContainers() {
 			cinfo.Command,
 			cinfo.CreatedTime)
 	}
-	fmt.Sprintln("<======信息展现结束======>")
+	fmt.Fprintf(w, "<======信息展现结束======>")
 	//刷新输出流缓冲区
 	w.Flush()
 }
