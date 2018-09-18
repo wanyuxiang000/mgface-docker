@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
+	"io/ioutil"
 	"mgface.com/container"
+	"mgface.com/containerInfo"
 	"mgface.com/subsystem"
 	"os"
+	"text/tabwriter"
 )
 
 const usage = "mgface是一个简单的容器应用，我们的目的是搞清楚docker到底是怎么玩的？let go it"
@@ -19,6 +22,7 @@ func main() {
 		runCommand,
 		initCommand,
 		commitCommand,
+		listCommand,
 	}
 	app.Before = func(context *cli.Context) error {
 		logrus.SetFormatter(&logrus.JSONFormatter{})
@@ -30,14 +34,50 @@ func main() {
 	}
 }
 
+func listContainers() {
+	dirURL := fmt.Sprintf(containerInfo.DefaultInfoLocation, "")
+	dirURL = dirURL[:len(dirURL)-1]
+	files, _ := ioutil.ReadDir(dirURL)
+	var containers []*containerInfo.ContainerInfo
+	for _, file := range files {
+		tmp, _ := containerInfo.GetContainerInfo(file)
+		containers = append(containers, tmp)
+	}
+
+	//打印信息
+	w := tabwriter.NewWriter(os.Stdout, 12, 1, 3, ' ', 0)
+	for _, cinfo := range containers {
+		fmt.Fprintf(w,
+			"%s\t%s\t%s\t%s\t%s\t%s\t\n",
+			cinfo.Id,
+			cinfo.Name,
+			cinfo.Pid,
+			cinfo.Status,
+			cinfo.Command,
+			cinfo.CreatedTime)
+	}
+	fmt.Sprintln("<======信息展现结束======>")
+	//刷新输出流缓冲区
+	w.Flush()
+}
+
+var listCommand = cli.Command{
+	Name:  "ps",
+	Usage: "显示所有的容器",
+	Action: func(context *cli.Context) error {
+		listContainers()
+		return nil
+	},
+}
+
 var commitCommand = cli.Command{
-	Name:"commit",
-	Usage:"提交一个容器成为新镜像",
-	Action: func(context *cli.Context) error{
-		if len(context.Args())<1 {
+	Name:  "commit",
+	Usage: "提交一个容器成为新镜像",
+	Action: func(context *cli.Context) error {
+		if len(context.Args()) < 1 {
 			return fmt.Errorf("错误的容器名称")
 		}
-		imageName:=context.Args().Get(0)
+		imageName := context.Args().Get(0)
 		container.CommitContainer(imageName)
 		return nil
 	},
@@ -63,16 +103,16 @@ var runCommand = cli.Command{
 			Usage: "cpuset限制",
 		},
 		cli.StringFlag{
-			Name:"v",
-			Usage:"volume",
+			Name:  "v",
+			Usage: "volume",
 		},
 		cli.BoolFlag{
-			Name:"d",
-			Usage:"detach container",
+			Name:  "d",
+			Usage: "detach container",
 		},
 		cli.StringFlag{
-			Name:"name",
-			Usage:"指定容器名称.",
+			Name:  "name",
+			Usage: "指定容器名称.",
 		},
 	},
 	Action: func(ctx *cli.Context) error {
@@ -88,9 +128,9 @@ var runCommand = cli.Command{
 
 		tty := ctx.Bool("it")
 
-		detach:=ctx.Bool("d")
+		detach := ctx.Bool("d")
 
-		containerName:=ctx.String("name")
+		containerName := ctx.String("name")
 
 		if detach && tty {
 			logrus.Errorf("-it 和 -d 不能同时存在.")
@@ -104,8 +144,8 @@ var runCommand = cli.Command{
 		}
 		logrus.Infof("入参:%t,命令:%s", tty, cmdArray)
 		//获得volume配置
-		volume:=ctx.String("v")
-		container.Run(tty, cmdArray, resconfig,volume,containerName)
+		volume := ctx.String("v")
+		container.Run(tty, cmdArray, resconfig, volume, containerName)
 		return nil
 	},
 }
