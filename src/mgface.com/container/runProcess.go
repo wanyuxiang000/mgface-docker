@@ -73,7 +73,7 @@ func Run(tty bool, command []string, res *subsystem.ResouceConfig, volume string
 		logrus.Infof("开始清理环境...")
 		aufs.DeleteWorkSpace("/root", "/root/mnt", volume)
 	}
-	//如果不启用tty，那么父进程直接运行完毕，然后资金池进行detach分离给init托管
+	//如果不启用tty，那么父进程直接运行完毕，然后子进程进行detach分离给init托管
 }
 
 func deleteContainerInfo(containerName string) {
