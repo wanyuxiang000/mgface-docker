@@ -57,7 +57,7 @@ func listContainers() {
 			cinfo.Command,
 			cinfo.CreatedTime)
 	}
-	fmt.Fprintf(w, "<======信息展现结束======>")
+	fmt.Fprintf(w, "<======信息展现结束======>\n")
 	//刷新输出流缓冲区
 	w.Flush()
 }
