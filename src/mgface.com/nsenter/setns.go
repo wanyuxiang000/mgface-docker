@@ -44,8 +44,5 @@ __attribute__((constructor)) void enter_namespace(void) {
 	exit(0);
 	return;
 }
-int test() {
-    return 2016;
-}
 */
 import "C"
