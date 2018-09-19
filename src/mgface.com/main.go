@@ -69,7 +69,7 @@ var execCommand = cli.Command{
 	Name:  "exec",
 	Usage: "进入容器",
 	Action: func(context *cli.Context) error {
-		if os.Getenv(container.ENV_EXEC_PID) != "" {
+		if os.Getenv(container.EnvExecPid) != "" {
 			logrus.Infof("pid(%d)进行自身回调.", os.Getpid())
 			return nil
 		}

@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	ENV_EXEC_PID = "mydocker_id"
-	ENV_EXEC_CMD = "mydocker_cmd"
+	EnvExecPid = "mgfacedocker_pid"
+	EnvExecCmd = "mgfacedocker_cmd"
 )
 
 func GetContainerPidByName(containerName string) (string, error) {
@@ -36,8 +36,8 @@ func ExecContainer(containerName string, cmdArray []string) {
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 
-	os.Setenv(ENV_EXEC_CMD, cmdStr)
-	os.Setenv(ENV_EXEC_PID, pid)
+	os.Setenv(EnvExecCmd, cmdStr)
+	os.Setenv(EnvExecPid, pid)
 
 	if err := cmd.Run(); err != nil {
 		logrus.Errorf("执行容器:%s，发生异常:%v", containerName, err)
