@@ -9,7 +9,7 @@ package nsenter
 #include <fcntl.h>
 
 __attribute__((constructor)) void enter_namespace(void) {
-	print("这个包一旦被引用,它就会在所有的go运行的环境启动之前执行,这样就避免了Go多线程导致的无法进入mnt Namespace的问题.这段程序执行完毕后,Go程序才会执行.\n")
+	print("这个包一旦被引用,它就会在所有的go运行的环境启动之前执行,这样就避免了Go多线程导致的无法进入mnt Namespace的问题.这段程序执行完毕后,Go程序才会执行.\n");
 	char *mydocker_pid;
 	mydocker_pid = getenv("mydocker_pid");
 	 printf("Cgo进行exec实现PID:%s\n", mydocker_pid);
