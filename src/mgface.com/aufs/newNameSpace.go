@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-//NewWorkspace("/root","/root/mnt")
-func NewWorkspace(rootURL string, mntURL string, volume string) {
+//NewNameSpace("/root","/root/mnt")
+func NewNameSpace(rootURL string, mntURL string, volume string) {
 	CreateReadOnlyLayer(rootURL)
 	CreateWriteLayer(rootURL)
 	CreateMountPoint(rootURL, mntURL)
