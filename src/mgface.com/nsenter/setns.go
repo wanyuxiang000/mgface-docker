@@ -1,14 +1,13 @@
-package nsenter
+package main
 
 /*
-#define _GNU_SOURCE
-#include <unistd.h>
 #include <errno.h>
 #include <sched.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+
 __attribute__((constructor)) void enter_namespace(void) {
 	char *mydocker_pid;
 	mydocker_pid = getenv("mydocker_pid");
@@ -43,7 +42,16 @@ __attribute__((constructor)) void enter_namespace(void) {
 	exit(0);
 	return;
 }
+int test() {
+    return 2016;
+}
 */
 import "C"
+
+import "fmt"
+
+func main() {
+	fmt.Println(C.test())
+}
 
 //这个包一旦被引用，它就会在所有的go运行的环境启动之前执行,这样就避免了Go多线程导致的无法进入mnt Namespace的问题。这段程序执行完毕后 ，Go程序才会执行。
