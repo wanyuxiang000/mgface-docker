@@ -6,9 +6,9 @@ import (
 	"time"
 )
 
-func TestRandStrinByte(t *testing.T){
+func TestRandStringBuffer(t *testing.T){
 	for a:=0;a<10 ;a++  {
 		time.Sleep(1*time.Second)
-		fmt.Println(randStrinByte(10))
+		fmt.Println(randStringBuffer(10))
 	}
 }

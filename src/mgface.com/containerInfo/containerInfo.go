@@ -3,6 +3,8 @@ package containerInfo
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Sirupsen/logrus"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -28,15 +30,28 @@ const (
 )
 
 func GetContainerName(containerName string) (string,string) {
-	id := randStrinByte(10)
+	id := randStringBuffer(10)
 	if containerName == "" {
 		containerName = id
 	}
 	return containerName,id
 }
 
+func GetContainerInfo(file os.FileInfo) (*ContainerInfo, error) {
+	containerName := file.Name()
+	configFileDir := fmt.Sprintf(DefaultInfoLocation, containerName)
+	configFileDir = configFileDir + ConfigName
+	content, err := ioutil.ReadFile(configFileDir)
+	if err != nil {
+		logrus.Errorf("读取文件失败%v", err)
+	}
+	var containerInfo ContainerInfo
+	json.Unmarshal(content, &containerInfo)
+	return &containerInfo, nil
+}
+//记录容器信息
 func RecordContainerInfo(containerPID int, commandArray []string, containerName string,id string) (string, error) {
-	//id := randStrinByte(10)
+	//id := randStringBuffer(10)
 	createTime := time.Now().Format("2006-01-02 15:04:05")
 	command := strings.Join(commandArray, ",")
 	//if containerName == "" {

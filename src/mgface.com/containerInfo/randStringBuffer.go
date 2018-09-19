@@ -4,8 +4,8 @@ import (
 	"math/rand"
 	"time"
 )
-
-func randStrinByte(n int) string{
+//生成10位随机的字符串
+func randStringBuffer(n int) string{
 	letterBytes:="0123456789"
 	b:=make([]byte,n)
 	rand.Seed(time.Now().UnixNano())
