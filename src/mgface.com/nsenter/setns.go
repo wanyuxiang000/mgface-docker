@@ -11,6 +11,7 @@ package nsenter
 __attribute__((constructor)) void enter_namespace(void) {
 	char *mydocker_pid;
 	mydocker_pid = getenv("mydocker_pid");
+	 printf("--->%s\n", mydocker_pid);
 	if (mydocker_pid) {
 		fprintf(stdout, "got mydocker_pid=%s\n", mydocker_pid);
 	} else {
