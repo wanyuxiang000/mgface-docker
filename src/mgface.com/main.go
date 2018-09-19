@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"mgface.com/container"
 	"mgface.com/containerInfo"
-	_ "mgface.com/nsenter"
+	//_ "mgface.com/nsenter"
 	"mgface.com/subsystem"
 	"os"
 	"text/tabwriter"
