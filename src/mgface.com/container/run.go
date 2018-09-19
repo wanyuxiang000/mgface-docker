@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd, *os.File) {
+func newParentProcess(tty bool, volume string, containerName string) (*exec.Cmd, *os.File) {
 	r, w, _ := os.Pipe()
 	args := []string{"init"}
 	cmd := exec.Command("/proc/self/exe", args...)
@@ -58,7 +58,7 @@ func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd,
 func Run(tty bool, command []string, res *subsystem.ResouceConfig, volume string, containerName string) {
 
 	containerName, id := containerInfo.GetContainerName(containerName)
-	parent, writePipe := NewParentProcess(tty, volume, containerName)
+	parent, writePipe := newParentProcess(tty, volume, containerName)
 	if err := parent.Start(); err != nil {
 		logrus.Fatal("发生错误:%s", err)
 	}

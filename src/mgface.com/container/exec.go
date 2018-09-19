@@ -17,7 +17,7 @@ const (
 	EnvExecCmd = "mgfacedocker_cmd"
 )
 
-func GetContainerPidByName(containerName string) (string, error) {
+func getContainerPidByName(containerName string) (string, error) {
 	dirURL := fmt.Sprintf(containerInfo.DefaultInfoLocation, containerName)
 	config := dirURL + containerInfo.ConfigName
 	content, _ := ioutil.ReadFile(config)
@@ -27,7 +27,7 @@ func GetContainerPidByName(containerName string) (string, error) {
 }
 
 func ExecContainer(containerName string, cmdArray []string) {
-	pid, _ := GetContainerPidByName(containerName)
+	pid, _ := getContainerPidByName(containerName)
 	cmdStr := strings.Join(cmdArray, " ")
 	logrus.Infof("容器ID:%s", pid)
 	logrus.Infof("command:%s", cmdStr)
