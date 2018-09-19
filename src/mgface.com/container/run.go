@@ -51,7 +51,7 @@ func newParentProcess(tty bool, volume string, containerName string) (*exec.Cmd,
 
 	//设置cmd的目录
 	cmd.Dir = "/root/mnt"
-	aufs.NewWorkspace("/root", "/root/mnt", volume)
+	aufs.NewNameSpace("/root", "/root/mnt", volume)
 	return cmd, w
 }
 
