@@ -12,8 +12,7 @@ import (
 	"text/tabwriter"
 )
 
-const usage = `
-mgface是一个简单的容器应用,我们的目的是搞清楚docker到底是怎么玩的？
+const usage = `mgface是一个简单的容器应用,我们的目的是搞清楚docker到底是怎么玩的?
  *      ┌─┐       ┌─┐
  *   ┌──┘ ┴───────┘ ┴──┐
  *   │                 │
@@ -39,6 +38,11 @@ mgface是一个简单的容器应用,我们的目的是搞清楚docker到底是�
 `
 
 func main() {
+	defer func() {
+		if e:=recover();e!=nil{
+			fmt.Sprintf("发生致命错误.%v\n",e)
+		}
+	}()
 	app := cli.NewApp()
 	app.Name = "mgface"
 	app.Usage = usage
@@ -48,6 +52,7 @@ func main() {
 		commitCommand,
 		listCommand,
 		logCommand,
+		execCommand,
 	}
 	app.Before = func(context *cli.Context) error {
 		logrus.SetFormatter(&logrus.JSONFormatter{})
@@ -57,6 +62,28 @@ func main() {
 	if err := app.Run(os.Args); err != nil {
 		logrus.Fatal(err)
 	}
+}
+
+var execCommand = cli.Command{
+	Name:  "exec",
+	Usage: "进入容器",
+	Action: func(context *cli.Context) error {
+		if os.Getenv(container.ENV_EXEC_PID) != "" {
+			logrus.Infof("pid(%s)进行自身回调.", os.Getpid())
+			return nil
+		}
+		if len(context.Args()) < 2 {
+			return fmt.Errorf("参数错误.")
+		}
+		containerName := context.Args().Get(0)
+		var commandArray []string
+		for _, arg := range context.Args().Tail() {
+			commandArray = append(commandArray, arg)
+		}
+		//进入容器
+		container.ExecContainer(containerName, commandArray)
+		return nil
+	},
 }
 
 var logCommand = cli.Command{
