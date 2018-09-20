@@ -16,7 +16,6 @@ var RmCommand = cli.Command{
 		}
 		containerName:=ctx.Args().Get(0)
 
-		//todo rm的时候还要删除挂载的文件。
 		return container.RemoveContainer(containerName)
 	},
 }

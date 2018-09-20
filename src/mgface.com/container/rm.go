@@ -19,6 +19,8 @@ func RemoveContainer(containerName string) error {
 		//logrus.Errorf("不能删除容器状态不为stopped,请先执行stop指令再删除.")
 		return errors.New("不能删除容器状态不为stopped,请先执行stop指令再删除.")
 	}
+
+	//TODO 删除挂载的文件
 	//删除当前目录
 	return os.RemoveAll(dirURL)
 }
