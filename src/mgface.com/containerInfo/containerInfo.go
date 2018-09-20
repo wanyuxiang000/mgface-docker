@@ -67,7 +67,7 @@ func RecordContainerInfo(containerPID int, commandArray []string, containerName 
 		Status:      RUNNING,
 	}
 
-	jsonBytes, _ := json.Marshal(containerInfo)
+	jsonBytes, _ := json.MarshalIndent(containerInfo,"","   ") //美化输出缩进格式
 	jsonstr := string(jsonBytes)
 	dirUrl := fmt.Sprintf(DefaultInfoLocation, containerName)
 	os.MkdirAll(dirUrl, 0622)
