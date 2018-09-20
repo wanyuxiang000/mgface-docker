@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-const usage = `mgface是一个简单的容器应用,我们的目的是搞清楚docker到底是怎么玩的?
+const usage = `mgface是一个简单的容器应用,我们的目的是怎么把玩docker?
  *      ┌─┐       ┌─┐
  *   ┌──┘ ┴───────┘ ┴──┐
  *   │                 │
@@ -35,8 +35,8 @@ const usage = `mgface是一个简单的容器应用,我们的目的是搞清楚d
 
 func main() {
 	defer func() {
-		if e:=recover();e!=nil{
-			fmt.Sprintf("发生致命错误.%v\n",e)
+		if e := recover(); e != nil {
+			fmt.Sprintf("发生致命错误.%v\n", e)
 		}
 	}()
 	app := cli.NewApp()
@@ -50,6 +50,7 @@ func main() {
 		command.LogCommand,
 		command.ExecCommand,
 		command.StopCommand,
+		command.RmCommand,
 	}
 	app.Before = func(context *cli.Context) error {
 		logrus.SetFormatter(&logrus.JSONFormatter{})
