@@ -15,18 +15,18 @@ func RunContainerInitProcess() error {
 	cmdArray := readUserCommand()
 	logrus.Infof("接收到的命令:%s", cmdArray)
 	if cmdArray == nil || len(cmdArray) == 0 {
-		return fmt.Errorf("Run container get user command error,cmdArray is nil")
+		return fmt.Errorf("获取用户输入的指令为空,不能为空!")
 	}
 
-	setUpMount()
+	setUpContainerMount()
 
 	path, err := exec.LookPath(cmdArray[0])
 
 	if err != nil {
-		logrus.Errorf("Exec loop path error %v", err)
+		logrus.Errorf("没有定位到执行的命令: %v", err)
 		return err
 	}
-	logrus.Infof("Find path %s", path)
+	logrus.Infof("找到命令的执行路径: %s", path)
 	//MS_NOEXEC 本文件系统不允许运行其他程序
 	//MS_NOSUID 不允许setuserId和setGroupId
 	//MS NODEV 这个参数是自 从 Linux 2.4 以来，所有 mount 的系统都会默认设定的参数
@@ -50,6 +50,23 @@ func readUserCommand() []string {
 	return strings.Split(msgstr, " ")
 }
 
+func setUpContainerMount() {
+	pwd, _ := os.Getwd()
+	logrus.Infof("当前的location: %s", pwd)
+	//makes the mount namespace works properly on my archlinux computer, systemd made "/" mounted as shared by default.
+	//systemd加入linux之后, mount namespace 就变成 shared by default, 所以你必须显示声明你要这个新的mount namespace独立
+	syscall.Mount("", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, "")
+	err := pivotRoot(pwd)
+	logrus.Infof("pivotRoot切换->%v", err)
+	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
+	if err := syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), ""); err != nil {
+		fmt.Println("mount proc 发生错误:", err)
+	}
+	if err := syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID|syscall.MS_STRICTATIME, "mode=755"); err != nil {
+		fmt.Println("mount tmpfs 发生错误:", err)
+	}
+}
+
 func pivotRoot(root string) error {
 	/**
 	  为了使当前root的老 root 和新 root 不在同一个文件系统下，我们把root重新mount了一次
@@ -69,7 +86,7 @@ func pivotRoot(root string) error {
 	if err := syscall.PivotRoot(root, pivotDir); err != nil {
 		return fmt.Errorf("pivot_root %v", err)
 	}
-
+	//把当前root表示的目录切换为根目录
 	if err := syscall.Chdir("/"); err != nil {
 		return fmt.Errorf("chdir / %v", err)
 	}
@@ -79,24 +96,5 @@ func pivotRoot(root string) error {
 	if err := syscall.Unmount(pivotDir, syscall.MNT_DETACH); err != nil {
 		return fmt.Errorf("umount pivot_root dir %v", err)
 	}
-
 	return os.Remove(pivotDir)
-
-}
-
-func setUpMount() {
-	pwd, _ := os.Getwd()
-	logrus.Infof("当前的location: %s", pwd)
-	//makes the mount namespace works properly on my archlinux computer, systemd made "/" mounted as shared by default.
-	//systemd加入linux之后, mount namespace 就变成 shared by default, 所以你必须显示声明你要这个新的mount namespace独立
-	syscall.Mount("", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, "")
-	err := pivotRoot(pwd)
-	logrus.Infof("pivotRoot切换->%v", err)
-	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
-	if err := syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), ""); err != nil {
-		fmt.Println("mount proc 发生错误:", err)
-	}
-	if err := syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID|syscall.MS_STRICTATIME, "mode=755"); err != nil {
-		fmt.Println("mount tmpfs 发生错误:", err)
-	}
 }

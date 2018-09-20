@@ -4,44 +4,46 @@ import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
+	"mgface.com/cgroup"
 	"mgface.com/container"
-	"mgface.com/subsystem"
 	"os"
 )
+
+var flag = []cli.Flag{
+	cli.BoolFlag{
+		Name:  "it",
+		Usage: "启用tty",
+	},
+	cli.StringFlag{
+		Name:  "m",
+		Usage: "内存限制",
+	},
+	cli.StringFlag{
+		Name:  "cpushare",
+		Usage: "cpushare限制",
+	},
+	cli.StringFlag{
+		Name:  "cpuset",
+		Usage: "cpuset限制",
+	},
+	cli.StringFlag{
+		Name:  "v",
+		Usage: "volume",
+	},
+	cli.BoolFlag{
+		Name:  "d",
+		Usage: "detach container",
+	},
+	cli.StringFlag{
+		Name:  "name",
+		Usage: "指定容器名称.",
+	},
+}
 
 var RunCommand = cli.Command{
 	Name:  "run",
 	Usage: "创建一个容器使用cgroup和namespace,指令为docker run -it [command]",
-	Flags: []cli.Flag{
-		cli.BoolFlag{
-			Name:  "it",
-			Usage: "启用tty",
-		},
-		cli.StringFlag{
-			Name:  "m",
-			Usage: "内存限制",
-		},
-		cli.StringFlag{
-			Name:  "cpushare",
-			Usage: "cpushare限制",
-		},
-		cli.StringFlag{
-			Name:  "cpuset",
-			Usage: "cpuset限制",
-		},
-		cli.StringFlag{
-			Name:  "v",
-			Usage: "volume",
-		},
-		cli.BoolFlag{
-			Name:  "d",
-			Usage: "detach container",
-		},
-		cli.StringFlag{
-			Name:  "name",
-			Usage: "指定容器名称.",
-		},
-	},
+	Flags: flag,
 	Action: func(ctx *cli.Context) error {
 
 		if len(ctx.Args()) < 1 {
@@ -64,7 +66,7 @@ var RunCommand = cli.Command{
 			os.Exit(-1)
 		}
 
-		resconfig := &subsystem.ResouceConfig{
+		resconfig := &cgroup.ResouceConfig{
 			CpuSet:      ctx.String("cpuset"),
 			CpuShare:    ctx.String("cpushare"),
 			MemoryLimit: ctx.String("m"),

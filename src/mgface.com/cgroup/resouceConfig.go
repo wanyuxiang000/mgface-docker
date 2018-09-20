@@ -1,4 +1,6 @@
-package subsystem
+package cgroup
+
+import "mgface.com/cgroup/impl"
 
 type ResouceConfig struct {
 	MemoryLimit string
@@ -6,17 +8,15 @@ type ResouceConfig struct {
 	CpuSet      string
 }
 
-type Subsytem interface {
+type cgroupSubsytem interface {
 	Name() string
 	Set(path string, res *ResouceConfig) error
 	Apply(path string, pid int) error
 	Remove(path string) error
 }
 
-var (
-	SybsystemsIns = []Subsytem{
-		&MemorySubSyetem{},
-		&CpuSubSyetem{},
-		&CpusetSubSystem{},
-	}
-)
+var cgroupSubsytems = []cgroupSubsytem{
+	&impl.MemorySubSyetem{},
+	&impl.CpuSubSyetem{},
+	&impl.CpusetSubSystem{},
+}

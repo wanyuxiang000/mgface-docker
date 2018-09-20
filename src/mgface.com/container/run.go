@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"mgface.com/aufs"
+	"mgface.com/cgroup"
+	"mgface.com/constVar"
 	"mgface.com/containerInfo"
-	"mgface.com/subsystem"
 	"os"
 	"os/exec"
 	"strings"
@@ -37,6 +38,7 @@ func newParentProcess(tty bool, volume string, containerName string) (*exec.Cmd,
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	} else {
+		//创建输出日志的目录和文件
 		dirURL := fmt.Sprintf(containerInfo.DefaultInfoLocation, containerName)
 		os.MkdirAll(dirURL, 0622)
 		stdLogFile := dirURL + containerInfo.ContainerLog
@@ -44,20 +46,29 @@ func newParentProcess(tty bool, volume string, containerName string) (*exec.Cmd,
 		logrus.Infof("生成容器:%s的日志文件:%s", containerName, stdLogFile)
 		cmd.Stdout = stdout
 	}
-	//会外带着这个文件句柄去创建子进程
-	//因为 1 个进程默认会有 3 个文件描述符，分别是标准输入、标准输出、标准错误。这3个
-	//是子进程一创建的时候就会默认带着的，那么外带的这个文件描述符理所当然地就成为了第4个
+	// 外带着这个文件句柄去创建子进程因为1个进程默认会有3个文件描述符,分别是标准输入、标准输出、标准错误.
+	// 这3个是子进程一创建就会默认带着的,那么外带的这个文件描述符就成为了第4个
 	cmd.ExtraFiles = []*os.File{r}
 
 	//设置cmd的目录
-	cmd.Dir = "/root/mnt"
-	aufs.NewNameSpace("/root", "/root/mnt", volume)
+	cmd.Dir = constVar.Cmd
+
+	//设置好容器进程的挂载点(作为容器的文件系统)
+	aufs.NewFileSystem(volume)
 	return cmd, w
 }
 
-func Run(tty bool, command []string, res *subsystem.ResouceConfig, volume string, containerName string) {
+func sendInitCommand(comArray []string, writePipe *os.File) {
+	command := strings.Join(comArray, " ")
+	logrus.Infof("所有的命令:%s", command)
+	writePipe.WriteString(command)
+	writePipe.Close()
+}
 
+func Run(tty bool, command []string, res *cgroup.ResouceConfig, volume string, containerName string) {
+	//获取容器名称
 	containerName, id := containerInfo.GetContainerName(containerName)
+	//创建容器的父进程
 	parent, writePipe := newParentProcess(tty, volume, containerName)
 	if err := parent.Start(); err != nil {
 		logrus.Fatal("发生错误:%s", err)
@@ -66,35 +77,22 @@ func Run(tty bool, command []string, res *subsystem.ResouceConfig, volume string
 	//记录容器信息
 	containerInfo.RecordContainerInfo(parent.Process.Pid, command, containerName, id)
 
-	manager := subsystem.NewCgroupManager("mgface-cgroup")
-	defer manager.Destory()
-	//设置资源限制
-	manager.Set(res)
-	//将容器进程加入到各个subsystem挂载对于的cgroup
-	manager.Apply(parent.Process.Pid)
+	//设置Cgroup
+	cgroup.SetCgroup(constVar.CgroupName, res, parent.Process.Pid)
 
+	//向容器进程进行通信
 	sendInitCommand(command, writePipe)
+
 	//假如启用了tty的话，那么父类进程等待子类进程结束
 	if tty {
 		parent.Wait()
-		deleteContainerInfo(containerName)
-		logrus.Infof("退出当前进程:%s", time.Now().Format("2006-01-02 15:04:05"))
+		//删除容器信息
+		containerInfo.DeleteContainerInfo(containerName)
+		logrus.Infof("退出当前进程:%d,时间为:%s", os.Getpid(), time.Now().Format("2006-01-02 15:04:05"))
 		logrus.Infof("开始清理环境...")
-		aufs.DeleteWorkSpace("/root", "/root/mnt", volume)
+		//删除挂载点数据
+		aufs.DeleteFileSystem(volume)
+	} else {
+		logrus.Infof("不启用tty,父进程直接运行完毕,子进程进行detach分离给操作系统的init托管.")
 	}
-	//如果不启用tty，那么父进程直接运行完毕，然后子进程进行detach分离给init托管
-}
-
-func deleteContainerInfo(containerName string) {
-	dirURL := fmt.Sprintf(containerInfo.DefaultInfoLocation, containerName)
-	if err := os.RemoveAll(dirURL); err != nil {
-		logrus.Errorf("删除目录 %s 失败:%v", dirURL, err)
-	}
-}
-
-func sendInitCommand(comArray []string, writePipe *os.File) {
-	command := strings.Join(comArray, " ")
-	logrus.Infof("所有的命令:%s", command)
-	writePipe.WriteString(command)
-	writePipe.Close()
 }

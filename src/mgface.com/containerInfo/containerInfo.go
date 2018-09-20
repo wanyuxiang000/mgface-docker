@@ -37,6 +37,13 @@ func GetContainerName(containerName string) (string,string) {
 	return containerName,id
 }
 
+func DeleteContainerInfo(containerName string) {
+	dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)
+	if err := os.RemoveAll(dirURL); err != nil {
+		logrus.Errorf("删除目录 %s 失败:%v", dirURL, err)
+	}
+}
+
 func GetContainerInfo(file os.FileInfo) (*ContainerInfo, error) {
 	containerName := file.Name()
 	configFileDir := fmt.Sprintf(DefaultInfoLocation, containerName)
@@ -51,12 +58,8 @@ func GetContainerInfo(file os.FileInfo) (*ContainerInfo, error) {
 }
 //记录容器信息
 func RecordContainerInfo(containerPID int, commandArray []string, containerName string,id string) (string, error) {
-	//id := randStringBuffer(10)
 	createTime := time.Now().Format("2006-01-02 15:04:05")
 	command := strings.Join(commandArray, ",")
-	//if containerName == "" {
-	//	containerName = id
-	//}
 
 	containerInfo := &ContainerInfo{
 		Pid:         strconv.Itoa(containerPID),
