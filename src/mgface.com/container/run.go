@@ -86,10 +86,10 @@ func Run(tty bool, command []string, res *cgroup.ResouceConfig, volume string, c
 	//假如启用了tty的话，那么父类进程等待子类进程结束
 	if tty {
 		parent.Wait()
-		//删除容器信息
-		containerInfo.DeleteContainerInfo(containerName)
 		logrus.Infof("退出当前进程:%d,时间为:%s", os.Getpid(), time.Now().Format("2006-01-02 15:04:05"))
 		logrus.Infof("开始清理环境...")
+		//删除容器信息
+		containerInfo.DeleteContainerInfo(containerName)
 		//删除挂载点数据
 		aufs.DeleteFileSystem(volume)
 	} else {

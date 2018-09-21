@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"mgface.com/aufs"
 	"mgface.com/containerInfo"
 	"os"
 )
@@ -20,7 +21,9 @@ func RemoveContainer(containerName string) error {
 		return errors.New("不能删除容器状态不为stopped,请先执行stop指令再删除.")
 	}
 
-	//TODO 删除挂载的文件
 	//删除当前目录
+	containerInfo.DeleteContainerInfo(containerName)
+	//删除挂载点数据
+	aufs.DeleteFileSystem("")
 	return os.RemoveAll(dirURL)
 }

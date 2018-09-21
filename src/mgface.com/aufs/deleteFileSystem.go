@@ -9,12 +9,13 @@ import (
 )
 
 func DeleteFileSystem(volume string) {
-	logrus.Infof("1)卸载挂载点...")
-	deleteMountPoint()
-	logrus.Infof("2)删除读写层...")
-	deleteWriteLayer()
-	logrus.Infof("3)删除挂载卷...")
+	logrus.Infof("1)删除挂载卷...")
 	deleteVolumeMapping(volume)
+	logrus.Infof("2)卸载挂载点...")
+	deleteMountPoint()
+	logrus.Infof("3)删除读写层...")
+	deleteWriteLayer()
+	//todo 准备清除掉tar解压的文件系统
 }
 
 func deleteVolumeMapping(volume string) {
