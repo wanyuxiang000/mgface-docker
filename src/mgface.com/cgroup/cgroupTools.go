@@ -40,7 +40,7 @@ func findCgroupMountpoint(subsystem string) string {
 	return ""
 }
 
-func GetCgroupPath(subsystem string, cgroupPath string, autocreate bool) (string, error) {
+func getCgroupPath(subsystem string, cgroupPath string, autocreate bool) (string, error) {
 	cgroupRoot := findCgroupMountpoint(subsystem)
 	cgroupURL := path.Join(cgroupRoot, cgroupPath)
 	logrus.Infof("子系统%s 创建cgroup路径:%s", subsystem, cgroupURL)
