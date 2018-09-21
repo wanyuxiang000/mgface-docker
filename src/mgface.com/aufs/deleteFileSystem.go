@@ -54,6 +54,6 @@ func deleteMountPoint() {
 
 func deleteWriteLayer() {
 	writeURL := constVar.WriteLayer
-	logrus.Infof("删除容器%v可写层.", writeURL)
+	logrus.Infof("删除容器 [%v] 可写层.", writeURL)
 	os.RemoveAll(writeURL)
 }
