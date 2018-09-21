@@ -36,6 +36,7 @@ func createReadOnlyLayer() {
 		logrus.Info("挂载的文件系统存在.目录:%s", busyboxUrl)
 		fileInfos, _ := ioutil.ReadDir(busyboxUrl)
 		if len(fileInfos) < 2 {
+			os.RemoveAll(busyboxUrl)
 			logrus.Errorf("文件系统目录下面不存在文件,解压tar文件系统 %s 到 %s .", busyboxTarURL, busyboxUrl)
 			createReadOnlyLayer()
 		}
