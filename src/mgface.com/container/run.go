@@ -67,7 +67,7 @@ func sendInitCommand(comArray []string, writePipe *os.File) {
 
 func Run(tty bool, command []string, res *cgroup.ResouceConfig, volume string, containerName string) {
 	//获取容器名称
-	containerName, id := containerInfo.GetContainerName(containerName)[%s]
+	containerName, id := containerInfo.GetContainerName(containerName)
 	//创建容器的父进程
 	parent, writePipe := newParentProcess(tty, volume, containerName)
 	if err := parent.Start(); err != nil {
