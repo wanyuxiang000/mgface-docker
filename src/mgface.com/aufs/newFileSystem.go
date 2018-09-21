@@ -2,6 +2,7 @@ package aufs
 
 import (
 	"errors"
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"io/ioutil"
 	"mgface.com/constVar"
@@ -10,24 +11,24 @@ import (
 	"strings"
 )
 
-func NewFileSystem(volume string) {
+func NewFileSystem(volume string, containerName string) {
 	logrus.Infof("1)创建只读层...")
-	createReadOnlyLayer()
+	createReadOnlyLayer(containerName)
 	logrus.Infof("2)创建可写层...")
-	createWriteLayer()
+	createWriteLayer(containerName)
 	logrus.Infof("3)创建挂载点...")
-	createMountPoint()
+	createMountPoint(containerName)
 	logrus.Infof("4)挂载卷映射...")
-	volumeMapping(volume)
+	volumeMapping(volume,containerName)
 }
 
 //创建只读层
-func createReadOnlyLayer() {
-	busyboxUrl := constVar.FileSystemURL
+func createReadOnlyLayer(containerName string) {
+	busyboxUrl := fmt.Sprintf(constVar.FileSystemURL, containerName)
 	busyboxTarURL := constVar.FileSystemTarURL
 	exist, _ := pathExit(busyboxUrl)
 	if exist == false {
-		if err := os.Mkdir(busyboxUrl, 0777); err != nil {
+		if err := os.MkdirAll(busyboxUrl, 0777); err != nil {
 			logrus.Errorf("创建目录%s  发生异常%v", busyboxUrl, err)
 		}
 		logrus.Infof("准备解压tar包:%s  到目录:%s", busyboxTarURL, busyboxUrl)
@@ -38,20 +39,21 @@ func createReadOnlyLayer() {
 		if len(fileInfos) < 2 {
 			os.RemoveAll(busyboxUrl)
 			logrus.Errorf("文件系统目录下面不存在文件,解压tar文件系统 %s 到 %s .", busyboxTarURL, busyboxUrl)
-			createReadOnlyLayer()
+			createReadOnlyLayer(containerName)
 		}
 	}
 }
 
-func createWriteLayer() {
-	writeURL := constVar.WriteLayer
+func createWriteLayer(containerName string) {
+	writeURL := fmt.Sprintf(constVar.WriteLayer, containerName)
 	os.Mkdir(writeURL, 0777)
 }
 
-func createMountPoint() error {
-	logrus.Infof("开始创建挂载点目录%s.", constVar.MntURL)
-	os.Mkdir(constVar.MntURL, 0777)
-	cmd := exec.Command("mount", "-t", "aufs", "-o", constVar.MountAufsDirs, "none", constVar.MntURL)
+func createMountPoint(containerName string) error {
+	containerNameURL := fmt.Sprintf(constVar.MntURL, containerName)
+	logrus.Infof("开始创建挂载点目录%s.", containerNameURL)
+	os.MkdirAll(containerNameURL, 0777)
+	cmd := exec.Command("mount", "-t", "aufs", "-o", fmt.Sprintf(constVar.MountAufsDirs, containerName, containerName), "none", containerNameURL)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
@@ -75,11 +77,11 @@ func pathExit(path string) (bool, error) {
 }
 
 //挂载卷映射
-func volumeMapping(volume string) {
+func volumeMapping(volume string,containerName string) {
 	if volume != "" {
 		volumeUrls := strings.Split(volume, ":")
 		if len(volumeUrls) == 2 && volumeUrls[0] != "" && volumeUrls[1] != "" {
-			mountVolume(volumeUrls)
+			mountVolume(volumeUrls,containerName)
 		} else {
 			logrus.Errorf("volume参数配置错误,请使用v1:v2这样的格式.")
 		}
@@ -88,12 +90,12 @@ func volumeMapping(volume string) {
 	}
 }
 
-func mountVolume(volumeUrls []string) {
+func mountVolume(volumeUrls []string,containerName string) {
 	parentUrl := volumeUrls[0]
-	os.Mkdir(parentUrl, 0777)
+	os.MkdirAll(parentUrl, 0777)
 
 	containerUrl := volumeUrls[1]
-	containerVolumeURL := constVar.MntURL + containerUrl
+	containerVolumeURL := fmt.Sprintf(constVar.MntURL,containerName) + containerUrl
 	os.MkdirAll(containerVolumeURL, 0777)
 
 	//把宿主机文件挂到容器挂载点上

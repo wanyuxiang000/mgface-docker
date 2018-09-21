@@ -51,10 +51,10 @@ func newParentProcess(tty bool, volume string, containerName string) (*exec.Cmd,
 	cmd.ExtraFiles = []*os.File{r}
 
 	//设置cmd的目录
-	cmd.Dir = constVar.Cmd
+	cmd.Dir = fmt.Sprintf(constVar.Cmd,containerName)
 
 	//设置好容器进程的挂载点(作为容器的文件系统)
-	aufs.NewFileSystem(volume)
+	aufs.NewFileSystem(volume,containerName)
 	return cmd, w
 }
 
@@ -78,7 +78,7 @@ func Run(tty bool, command []string, res *cgroup.ResouceConfig, volume string, c
 	containerInfo.RecordContainerInfo(parent.Process.Pid, command, containerName, id)
 
 	//设置Cgroup
-	cgroup.SetCgroup(constVar.CgroupName, res, parent.Process.Pid)
+	cgroup.SetCgroup(fmt.Sprintf(constVar.CgroupName,containerName), res, parent.Process.Pid)
 
 	//向容器进程进行通信
 	sendInitCommand(command, writePipe)
@@ -91,7 +91,7 @@ func Run(tty bool, command []string, res *cgroup.ResouceConfig, volume string, c
 		//删除容器信息
 		containerInfo.DeleteContainerInfo(containerName)
 		//删除挂载点数据
-		aufs.DeleteFileSystem(volume)
+		aufs.DeleteFileSystem(volume,containerName)
 	} else {
 		logrus.Infof("不启用tty,父进程直接运行完毕,子进程进行detach分离给操作系统的init托管.")
 	}

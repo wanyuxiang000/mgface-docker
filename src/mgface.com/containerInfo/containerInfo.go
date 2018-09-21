@@ -17,6 +17,7 @@ type ContainerInfo struct {
 	Name        string `json:"name"`        //容器名称
 	Command     string `json:"command"`     //容器内init进程的执行命令
 	CreatedTime string `json:"createdTime"` //创建时间
+	StoppedTime string `json:"stoppedTime"` //停止时间
 	Status      string `json:"status"`      //容器状态
 }
 
@@ -67,6 +68,7 @@ func RecordContainerInfo(containerPID int, commandArray []string, containerName 
 		Name:        containerName,
 		Command:     command,
 		CreatedTime: createTime,
+		StoppedTime: "",
 		Status:      RUNNING,
 	}
 

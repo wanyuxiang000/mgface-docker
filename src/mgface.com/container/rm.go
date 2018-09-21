@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"mgface.com/aufs"
 	"mgface.com/containerInfo"
-	"os"
 )
 
 func RemoveContainer(containerName string) error {
@@ -24,6 +23,6 @@ func RemoveContainer(containerName string) error {
 	//删除当前目录
 	containerInfo.DeleteContainerInfo(containerName)
 	//删除挂载点数据
-	aufs.DeleteFileSystem("")
-	return os.RemoveAll(dirURL)
+	aufs.DeleteFileSystem("", containerName)
+	return nil
 }

@@ -1,6 +1,7 @@
 package aufs
 
 import (
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"mgface.com/constVar"
 	"os"
@@ -8,29 +9,39 @@ import (
 	"strings"
 )
 
-func DeleteFileSystem(volume string) {
+func DeleteFileSystem(volume string, containerName string) {
 	logrus.Infof("1)删除挂载卷...")
-	deleteVolumeMapping(volume)
+	deleteVolumeMapping(volume, containerName)
 	logrus.Infof("2)卸载挂载点...")
-	deleteMountPoint()
+	deleteMountPoint(containerName)
 	logrus.Infof("3)删除读写层...")
-	deleteWriteLayer()
+	deleteWriteLayer(containerName)
 	//todo 准备清除掉tar解压的文件系统
+	logrus.Info("删除只读层...")
+	deleteReadOnlyLayer(containerName)
+
 }
 
-func deleteVolumeMapping(volume string) {
+func deleteReadOnlyLayer(containerName string) {
+	busyboxUrl := fmt.Sprintf(constVar.FileSystemURL, containerName)
+	if exist, _ := pathExit(busyboxUrl); exist {
+		os.RemoveAll(busyboxUrl)
+	}
+}
+
+func deleteVolumeMapping(volume string, containerName string) {
 	if volume != "" {
 		volumeUrls := strings.Split(volume, ":")
 		if len(volumeUrls) == 2 && volumeUrls[0] != "" && volumeUrls[1] != "" {
-			deleteMountPointWithVolume(volumeUrls)
+			deleteMountPointWithVolume(volumeUrls, containerName)
 		}
 	} else {
 		logrus.Info("没有挂载卷数据.")
 	}
 }
 
-func deleteMountPointWithVolume(volumeURL []string) {
-	containerUrl := constVar.MntURL + volumeURL[1]
+func deleteMountPointWithVolume(volumeURL []string, containerName string) {
+	containerUrl := fmt.Sprintf(constVar.MntURL, containerName) + volumeURL[1]
 	cmd := exec.Command("umount", containerUrl)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -39,8 +50,8 @@ func deleteMountPointWithVolume(volumeURL []string) {
 	}
 }
 
-func deleteMountPoint() {
-	mntURL := constVar.MntURL
+func deleteMountPoint(containerName string) {
+	mntURL := fmt.Sprintf(constVar.MntURL, containerName)
 	cmd := exec.Command("umount", mntURL)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -52,8 +63,8 @@ func deleteMountPoint() {
 	os.RemoveAll(mntURL)
 }
 
-func deleteWriteLayer() {
-	writeURL := constVar.WriteLayer
+func deleteWriteLayer(containerName string) {
+	writeURL := fmt.Sprintf(constVar.WriteLayer, containerName)
 	logrus.Infof("删除容器 [%v] 可写层.", writeURL)
 	os.RemoveAll(writeURL)
 }
