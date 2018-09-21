@@ -18,6 +18,7 @@ func (s *cpuSubSyetem) Set(cgroupPath string, res *ResouceConfig) error {
 	if subsysCgroupPath, err := getCgroupPath(s.Name(), cgroupPath, true); err == nil {
 		if res.CpuShare != "" {
 			if err := ioutil.WriteFile(path.Join(subsysCgroupPath, "cpu.shares"), []byte(res.CpuShare), 0644); err != nil {
+				//panic("设置使用cpu权重失败 %v")
 				return fmt.Errorf("设置使用cpu权重失败 %v", err)
 			}
 		}

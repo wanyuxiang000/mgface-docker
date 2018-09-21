@@ -10,13 +10,21 @@ import (
 )
 
 //设置cgroup参数
-func SetCgroup(cgroupName string, res *ResouceConfig, pid int) {
+func SetCgroup(cgroupName string, res *ResouceConfig, pid int) *cgroupManager {
 	manager := newCgroupManager(cgroupName)
-	defer manager.Destory()
+	defer func() {
+		if err := recover(); err != nil {
+			logrus.Info("发生了panic异常,信息为:%s,进行资源销毁.", err)
+			manager.Destory()
+		}
+	}()
 	//设置资源限制
 	manager.Set(res)
+	logrus.Infof("设置cgroup资源限制完成....")
 	//将容器进程加入到各个cgroup subsystem
 	manager.Apply(pid)
+	logrus.Infof("应用cgroup添加PID进相应限制文件的Task文件完成...")
+	return manager
 }
 
 func findCgroupMountpoint(subsystem string) string {

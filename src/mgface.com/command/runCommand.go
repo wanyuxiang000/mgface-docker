@@ -71,7 +71,7 @@ var RunCommand = cli.Command{
 			CpuShare:    ctx.String("cpushare"),
 			MemoryLimit: ctx.String("m"),
 		}
-		logrus.Infof("入参:%t,命令:%s", tty, cmdArray)
+		logrus.Infof("入参tty:%t,命令:%s", tty, cmdArray)
 		//获得volume配置
 		volume := ctx.String("v")
 		container.Run(tty, cmdArray, resconfig, volume, containerName)
