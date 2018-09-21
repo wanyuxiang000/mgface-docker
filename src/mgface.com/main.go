@@ -41,7 +41,11 @@ func main() {
 	}()
 	app := cli.NewApp()
 	app.Name = "mgface"
+	app.Version = "1.0.0"
+	app.Author = "Yuxiang Wan"
+	app.Copyright = "mgface@2018-∞"
 	app.Usage = usage
+	app.Email = "15622535353@163.com"
 	app.Commands = []cli.Command{
 		command.RunCommand,
 		command.InitCommand,

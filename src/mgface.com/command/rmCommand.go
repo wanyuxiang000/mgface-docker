@@ -8,7 +8,7 @@ import (
 
 var RmCommand = cli.Command{
 	Name:  "rm",
-	Usage: "mainfunc -rm 容名称",
+	Usage: "移除容器",
 	Action: func(ctx *cli.Context) error {
 		if len(ctx.Args())<1 {
 			fmt.Errorf("rm的参数必须不少于1")
