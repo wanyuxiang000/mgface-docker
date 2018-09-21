@@ -1,4 +1,4 @@
-package cgroup_limit
+package cgroup
 
 import (
 	"fmt"
