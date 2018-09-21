@@ -1,6 +1,8 @@
 package cgroup
 
-import "mgface.com/cgroup/impl"
+import (
+	"mgface.com/cgroup.limit"
+)
 
 type ResouceConfig struct {
 	MemoryLimit string
@@ -16,7 +18,7 @@ type cgroupSubsytem interface {
 }
 
 var cgroupSubsytems = []cgroupSubsytem{
-	&impl.MemorySubSyetem{},
-	&impl.CpuSubSyetem{},
-	&impl.CpusetSubSystem{},
+	&cgroup_limit.MemorySubSyetem{},
+	&cgroup_limit.CpuSubSyetem{},
+	&cgroup_limit.CpusetSubSystem{},
 }
