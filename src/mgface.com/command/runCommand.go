@@ -38,6 +38,10 @@ var flag = []cli.Flag{
 		Name:  "name",
 		Usage: "指定容器名称.",
 	},
+	cli.StringSliceFlag{
+		Name:  "e",
+		Usage: "设置环境变量.",
+	},
 }
 
 var RunCommand = cli.Command{
@@ -74,7 +78,10 @@ var RunCommand = cli.Command{
 		logrus.Infof("入参tty:%t,命令:%s", tty, cmdArray)
 		//获得volume配置
 		volume := ctx.String("v")
-		container.Run(tty, cmdArray, resconfig, volume, containerName)
+
+		//获得环境变量
+		envs:=ctx.StringSlice("e")
+		container.Run(tty, cmdArray, resconfig, volume, containerName,envs)
 		return nil
 	},
 }
