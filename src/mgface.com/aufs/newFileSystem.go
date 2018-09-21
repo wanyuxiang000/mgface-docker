@@ -33,12 +33,11 @@ func createReadOnlyLayer() {
 		logrus.Infof("准备解压tar包:%s  到目录:%s", busyboxTarURL, busyboxUrl)
 		exec.Command("tar", "-xvf", busyboxTarURL, "-C", busyboxUrl).CombinedOutput()
 	} else {
-		logrus.Info("挂载的文件系统存在.目录:%s",busyboxUrl)
+		logrus.Info("挂载的文件系统存在.目录:%s", busyboxUrl)
 		fileInfos, _ := ioutil.ReadDir(busyboxUrl)
-		logrus.Info(len(fileInfos))
-		logrus.Infof("------------")
-		if len(fileInfos) < 1 {
-			logrus.Errorf("文件系统目录下面不存在文件,请确认文件系统tar是否解压.", busyboxUrl)
+		if len(fileInfos) < 2 {
+			logrus.Errorf("文件系统目录下面不存在文件,解压tar文件系统 %s 到 %s .", busyboxTarURL, busyboxUrl)
+			createReadOnlyLayer()
 		}
 	}
 }
