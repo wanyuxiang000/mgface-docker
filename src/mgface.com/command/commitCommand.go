@@ -8,13 +8,14 @@ import (
 
 var CommitCommand = cli.Command{
 	Name:  "commit",
-	Usage: "提交一个容器成为新镜像",
+	Usage: "提交一个容器成为新镜像,命令:commit [contianerName]  [imageName]",
 	Action: func(context *cli.Context) error {
-		if len(context.Args()) < 1 {
-			return fmt.Errorf("错误的容器名称")
+		if len(context.Args()) < 2 {
+			return fmt.Errorf("参数必须为commit 容器名称  镜像名称")
 		}
-		imageName := context.Args().Get(0)
-		container.CommitContainer(imageName)
+		containerName := context.Args().Get(0)
+		imageName := context.Args().Get(1)
+		container.CommitContainer(containerName,imageName)
 		return nil
 	},
 }

@@ -8,4 +8,5 @@ const (
 	WriteLayer = "/root/writeLayer/%s/" //创建可写层
 	MountAufsDirs = "dirs=" + WriteLayer + ":" + FileSystemURL //挂载的Aufs文件系统
 	CgroupName = "mgfaceCgroup/%s"
+	ImageStoreURL = "/root/%s.tar"
 )
