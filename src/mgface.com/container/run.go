@@ -56,7 +56,7 @@ func newParentProcess(tty bool, volume string, containerName string,envs []strin
 	//设置环境变量
 	//默认情况下,新启动进程的环境变量都是继承于原来父进程的,但是如果手动指定了环境变量,那么就会覆盖掉原来继承自父进程的变量。由于在容器的进程中，
 	//有时候还需要使用原来父进程的环境变量,比如PATH等,因此这里会使用os.Environ()来获取宿主机的环境变量,然后把自定义的变量加进去。
-	cmd.Env = append(os.Environ(),envs)
+	cmd.Env = append(os.Environ(),envs...)
 
 	//设置好容器进程的挂载点(作为容器的文件系统)
 	aufs.NewFileSystem(volume,containerName)
