@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func newParentProcess(tty bool, volume string, containerName string,envs string) (*exec.Cmd, *os.File) {
+func newParentProcess(tty bool, volume string, containerName string,envs []string) (*exec.Cmd, *os.File) {
 	r, w, _ := os.Pipe()
 	args := []string{"init"}
 	cmd := exec.Command("/proc/self/exe", args...)
@@ -70,7 +70,7 @@ func sendInitCommand(comArray []string, writePipe *os.File) {
 	writePipe.Close()
 }
 
-func Run(tty bool, command []string, res *cgroup.ResouceConfig, volume string, containerName string,envs string) {
+func Run(tty bool, command []string, res *cgroup.ResouceConfig, volume string, containerName string,envs []string) {
 	//获取容器名称
 	containerName, id := containerInfo.GetContainerName(containerName)
 	//创建容器的父进程
