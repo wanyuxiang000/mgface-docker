@@ -81,7 +81,7 @@ func volumeMapping(volumes string, containerName string) {
 	if volumes != "" {
 		volumeUrls := strings.Split(volumes, ",")
 		for _, v := range volumeUrls {
-			logrus.Info("挂载  [%s]  挂载点")
+			logrus.Info("挂载  [%s]  挂载点",v)
 			volume := strings.Split(v, ":")
 			if len(volume) == 2 && volume[0] != "" && volume[1] != "" {
 				mountVolume(volume, containerName)
