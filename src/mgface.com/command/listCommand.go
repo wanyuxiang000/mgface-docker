@@ -30,18 +30,20 @@ func listContainers() {
 
 	w := tabwriter.NewWriter(os.Stdout, 12, 1, 3, ' ', 0)
 	//打印信息
-	fmt.Fprintf(w, "ID\t容器名称\tPID\t状态\t命令\t创建时间\t\n")
+	fmt.Fprintf(w, "*****************信息展现start*****************\n")
+	fmt.Fprintf(w, "ID\t容器名称\tPID\t状态\t命令\t创建时间\t结束时间\t\n")
 	for _, cinfo := range containers {
 		fmt.Fprintf(w,
-			"%s\t%s\t%s\t%s\t%s\t%s\t\n",
+			"%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n",
 			cinfo.Id,
 			cinfo.Name,
 			cinfo.Pid,
 			cinfo.Status,
 			cinfo.Command,
-			cinfo.CreatedTime)
+			cinfo.CreatedTime,
+			cinfo.StoppedTime)
 	}
-	fmt.Fprintf(w, "<======信息展现结束======>\n")
+	fmt.Fprintf(w, "*****************信息展现end*****************\n")
 	//刷新输出流缓冲区
 	w.Flush()
 }

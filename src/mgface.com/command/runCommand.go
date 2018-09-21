@@ -28,7 +28,7 @@ var flag = []cli.Flag{
 	},
 	cli.StringFlag{
 		Name:  "v",
-		Usage: "volume",
+		Usage: "volume,挂载多个文件请使用\",\"隔开",
 	},
 	cli.BoolFlag{
 		Name:  "d",

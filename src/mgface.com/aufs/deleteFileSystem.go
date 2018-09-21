@@ -29,11 +29,15 @@ func deleteReadOnlyLayer(containerName string) {
 	}
 }
 
-func deleteVolumeMapping(volume string, containerName string) {
-	if volume != "" {
-		volumeUrls := strings.Split(volume, ":")
-		if len(volumeUrls) == 2 && volumeUrls[0] != "" && volumeUrls[1] != "" {
-			deleteMountPointWithVolume(volumeUrls, containerName)
+func deleteVolumeMapping(volumes string, containerName string) {
+	if volumes != "" {
+		volumeUrls := strings.Split(volumes, ",")
+		for _, v := range volumeUrls {
+			logrus.Info("删除挂载点  [%s] ")
+			volume := strings.Split(v, ":")
+			if len(volume) == 2 && volume[0] != "" && volume[1] != "" {
+				deleteMountPointWithVolume(volume, containerName)
+			}
 		}
 	} else {
 		logrus.Info("没有挂载卷数据.")

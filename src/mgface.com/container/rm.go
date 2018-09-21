@@ -23,6 +23,6 @@ func RemoveContainer(containerName string) error {
 	//删除当前目录
 	containerInfo.DeleteContainerInfo(containerName)
 	//删除挂载点数据
-	aufs.DeleteFileSystem("", containerName)
+	aufs.DeleteFileSystem(cinfo.Volume, containerName)
 	return nil
 }

@@ -75,7 +75,7 @@ func Run(tty bool, command []string, res *cgroup.ResouceConfig, volume string, c
 	}
 
 	//记录容器信息
-	containerInfo.RecordContainerInfo(parent.Process.Pid, command, containerName, id)
+	containerInfo.RecordContainerInfo(parent.Process.Pid, command, containerName, id,volume)
 
 	//设置Cgroup
 	cgroup.SetCgroup(fmt.Sprintf(constVar.CgroupName,containerName), res, parent.Process.Pid)

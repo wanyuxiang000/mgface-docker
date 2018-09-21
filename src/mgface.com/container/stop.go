@@ -8,6 +8,7 @@ import (
 	"mgface.com/containerInfo"
 	"strconv"
 	"syscall"
+	"time"
 )
 
 func StopContainer(containerName string) error {
@@ -23,6 +24,7 @@ func StopContainer(containerName string) error {
 		logrus.Errorf("中断进程%d失败,异常信息为:%v", ipid, err)
 	}
 	containerinfo.Status = containerInfo.STOP
+	containerinfo.StoppedTime = time.Now().Format("2006-01-02 15:04:05")
 	containerinfo.Pid = ""
 	content, _ = json.Marshal(containerinfo)
 	if err := ioutil.WriteFile(configURL, content, 0622); err != nil {

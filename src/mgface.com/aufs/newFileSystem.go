@@ -19,7 +19,7 @@ func NewFileSystem(volume string, containerName string) {
 	logrus.Infof("3)创建挂载点...")
 	createMountPoint(containerName)
 	logrus.Infof("4)挂载卷映射...")
-	volumeMapping(volume,containerName)
+	volumeMapping(volume, containerName)
 }
 
 //创建只读层
@@ -77,25 +77,29 @@ func pathExit(path string) (bool, error) {
 }
 
 //挂载卷映射
-func volumeMapping(volume string,containerName string) {
-	if volume != "" {
-		volumeUrls := strings.Split(volume, ":")
-		if len(volumeUrls) == 2 && volumeUrls[0] != "" && volumeUrls[1] != "" {
-			mountVolume(volumeUrls,containerName)
-		} else {
-			logrus.Errorf("volume参数配置错误,请使用v1:v2这样的格式.")
+func volumeMapping(volumes string, containerName string) {
+	if volumes != "" {
+		volumeUrls := strings.Split(volumes, ",")
+		for _, v := range volumeUrls {
+			logrus.Info("挂载  [%s]  挂载点")
+			volume := strings.Split(v, ":")
+			if len(volume) == 2 && volume[0] != "" && volume[1] != "" {
+				mountVolume(volume, containerName)
+			} else {
+				logrus.Errorf("volume参数配置错误,请使用v1:v2这样的格式.")
+			}
 		}
 	} else {
 		logrus.Info("没有挂载卷数据.")
 	}
 }
 
-func mountVolume(volumeUrls []string,containerName string) {
+func mountVolume(volumeUrls []string, containerName string) {
 	parentUrl := volumeUrls[0]
 	os.MkdirAll(parentUrl, 0777)
 
 	containerUrl := volumeUrls[1]
-	containerVolumeURL := fmt.Sprintf(constVar.MntURL,containerName) + containerUrl
+	containerVolumeURL := fmt.Sprintf(constVar.MntURL, containerName) + containerUrl
 	os.MkdirAll(containerVolumeURL, 0777)
 
 	//把宿主机文件挂到容器挂载点上

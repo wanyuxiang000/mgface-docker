@@ -19,6 +19,7 @@ type ContainerInfo struct {
 	CreatedTime string `json:"createdTime"` //创建时间
 	StoppedTime string `json:"stoppedTime"` //停止时间
 	Status      string `json:"status"`      //容器状态
+	Volume      string `json:"volume"`      //挂载卷
 }
 
 const (
@@ -30,12 +31,12 @@ const (
 	ContainerLog        = "container.log"
 )
 
-func GetContainerName(containerName string) (string,string) {
+func GetContainerName(containerName string) (string, string) {
 	id := randStringBuffer(10)
 	if containerName == "" {
 		containerName = id
 	}
-	return containerName,id
+	return containerName, id
 }
 
 func DeleteContainerInfo(containerName string) {
@@ -57,8 +58,9 @@ func GetContainerInfo(file os.FileInfo) (*ContainerInfo, error) {
 	json.Unmarshal(content, &containerInfo)
 	return &containerInfo, nil
 }
+
 //记录容器信息
-func RecordContainerInfo(containerPID int, commandArray []string, containerName string,id string) (string, error) {
+func RecordContainerInfo(containerPID int, commandArray []string, containerName string, id string, volume string) (string, error) {
 	createTime := time.Now().Format("2006-01-02 15:04:05")
 	command := strings.Join(commandArray, ",")
 
@@ -70,9 +72,10 @@ func RecordContainerInfo(containerPID int, commandArray []string, containerName 
 		CreatedTime: createTime,
 		StoppedTime: "",
 		Status:      RUNNING,
+		Volume:      volume,
 	}
 
-	jsonBytes, _ := json.MarshalIndent(containerInfo,"","   ") //美化输出缩进格式
+	jsonBytes, _ := json.MarshalIndent(containerInfo, "", "   ") //美化输出缩进格式
 	jsonstr := string(jsonBytes)
 	dirUrl := fmt.Sprintf(DefaultInfoLocation, containerName)
 	os.MkdirAll(dirUrl, 0622)
