@@ -46,7 +46,7 @@ func createReadOnlyLayer(containerName string) {
 
 func createWriteLayer(containerName string) {
 	writeURL := fmt.Sprintf(constVar.WriteLayer, containerName)
-	os.Mkdir(writeURL, 0777)
+	os.MkdirAll(writeURL, 0777)
 }
 
 func createMountPoint(containerName string) error {
