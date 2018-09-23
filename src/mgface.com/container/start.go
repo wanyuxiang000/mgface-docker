@@ -32,6 +32,7 @@ func StartContainer(containerName string) error {
 	containerinfo.Status = containerInfo.RUNNING
 	containerinfo.StoppedTime = ""
 	content, _ = json.MarshalIndent(containerinfo, "", "   ") //美化输出缩进格式
+	content = append(content, []byte("\n")...)
 	if err := ioutil.WriteFile(configURL, content, 0622); err != nil {
 		logrus.Errorf("写文件%s失败，错误日志:%v", configURL, err)
 	}
