@@ -81,7 +81,7 @@ var RunCommand = cli.Command{
 
 		//获得环境变量
 		envs:=ctx.StringSlice("e")
-		container.Run(tty, cmdArray, resconfig, volume, containerName,envs)
+		container.RunContainer(tty, cmdArray, resconfig, volume, containerName,envs)
 		return nil
 	},
 }

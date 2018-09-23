@@ -6,18 +6,19 @@ import (
 	"fmt"
 	"io/ioutil"
 	"mgface.com/aufs"
+	"mgface.com/constVar"
 	"mgface.com/containerInfo"
 	"strconv"
 	"syscall"
 )
 
 func RemoveContainer(containerName string) error {
-	dirURL := fmt.Sprintf(containerInfo.DefaultInfoLocation, containerName)
-	configURL := dirURL + containerInfo.ConfigName
+	dirURL := fmt.Sprintf(constVar.DefaultInfoLocation, containerName)
+	configURL := dirURL + constVar.ConfigName
 	content, _ := ioutil.ReadFile(configURL)
 	var cinfo containerInfo.ContainerInfo
 	json.Unmarshal(content, &cinfo)
-	if cinfo.Status != containerInfo.STOP {
+	if cinfo.Status != constVar.STOP {
 		//logrus.Errorf("不能删除容器状态不为stopped,请先执行stop指令再删除.")
 		return errors.New("不能删除容器状态不为stopped,请先执行stop指令再删除.")
 	}

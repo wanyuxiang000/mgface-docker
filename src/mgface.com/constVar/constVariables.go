@@ -9,4 +9,11 @@ const (
 	MountAufsDirs = "dirs=" + WriteLayer + ":" + FileSystemURL //挂载的Aufs文件系统
 	CgroupName = "mgfaceCgroup/%s"
 	ImageStoreURL = "/root/%s.tar"
+	//容器熟悉
+	RUNNING             = "running"
+	STOP                = "stopped"
+	//Exit                = "exited"
+	DefaultInfoLocation = "/var/run/mgface-docker/%s/"
+	ConfigName          = "config.json"
+	ContainerLog        = "container.log"
 )

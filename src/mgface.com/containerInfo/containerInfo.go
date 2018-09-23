@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"io/ioutil"
+	"mgface.com/constVar"
 	"os"
 	"strconv"
 	"strings"
@@ -22,14 +23,7 @@ type ContainerInfo struct {
 	Volume      string `json:"volume"`      //挂载卷
 }
 
-const (
-	RUNNING             = "running"
-	STOP                = "stopped"
-	//Exit                = "exited"
-	DefaultInfoLocation = "/var/run/mgface-docker/%s/"
-	ConfigName          = "config.json"
-	ContainerLog        = "container.log"
-)
+
 
 func GetContainerName(containerName string) (string, string) {
 	id := randStringBuffer(10)
@@ -40,7 +34,7 @@ func GetContainerName(containerName string) (string, string) {
 }
 
 func DeleteContainerInfo(containerName string) {
-	dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)
+	dirURL := fmt.Sprintf(constVar.DefaultInfoLocation, containerName)
 	if err := os.RemoveAll(dirURL); err != nil {
 		logrus.Errorf("删除目录 %s 失败:%v", dirURL, err)
 	}
@@ -48,8 +42,8 @@ func DeleteContainerInfo(containerName string) {
 
 func GetContainerInfo(file os.FileInfo) (*ContainerInfo, error) {
 	containerName := file.Name()
-	configFileDir := fmt.Sprintf(DefaultInfoLocation, containerName)
-	configFileDir = configFileDir + ConfigName
+	configFileDir := fmt.Sprintf(constVar.DefaultInfoLocation, containerName)
+	configFileDir = configFileDir + constVar.ConfigName
 	content, err := ioutil.ReadFile(configFileDir)
 	if err != nil {
 		logrus.Errorf("读取文件失败%v", err)
@@ -71,15 +65,15 @@ func RecordContainerInfo(containerPID int, commandArray []string, containerName 
 		Command:     command,
 		CreatedTime: createTime,
 		StoppedTime: "",
-		Status:      RUNNING,
+		Status:      constVar.RUNNING,
 		Volume:      volume,
 	}
 
 	jsonBytes, _ := json.MarshalIndent(containerInfo, "", "   ") //美化输出缩进格式
 	jsonstr := string(jsonBytes)
-	dirUrl := fmt.Sprintf(DefaultInfoLocation, containerName)
+	dirUrl := fmt.Sprintf(constVar.DefaultInfoLocation, containerName)
 	os.MkdirAll(dirUrl, 0622)
-	fileName := dirUrl + "/" + ConfigName
+	fileName := dirUrl + "/" + constVar.ConfigName
 	file, _ := os.Create(fileName)
 	defer file.Close()
 	file.WriteString(jsonstr)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"io/ioutil"
+	"mgface.com/constVar"
 	"mgface.com/containerInfo"
 	_ "mgface.com/nsenter"
 	"os"
@@ -18,8 +19,8 @@ const (
 )
 
 func getContainerPidByName(containerName string) (string, error) {
-	dirURL := fmt.Sprintf(containerInfo.DefaultInfoLocation, containerName)
-	config := dirURL + containerInfo.ConfigName
+	dirURL := fmt.Sprintf(constVar.DefaultInfoLocation, containerName)
+	config := dirURL + constVar.ConfigName
 	content, _ := ioutil.ReadFile(config)
 	var info containerInfo.ContainerInfo
 	json.Unmarshal(content, &info)

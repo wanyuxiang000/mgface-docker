@@ -39,9 +39,9 @@ func newParentProcess(tty bool, volume string, containerName string,envs []strin
 		cmd.Stderr = os.Stderr
 	} else {
 		//创建输出日志的目录和文件
-		dirURL := fmt.Sprintf(containerInfo.DefaultInfoLocation, containerName)
+		dirURL := fmt.Sprintf(constVar.DefaultInfoLocation, containerName)
 		os.MkdirAll(dirURL, 0622)
-		stdLogFile := dirURL + containerInfo.ContainerLog
+		stdLogFile := dirURL + constVar.ContainerLog
 		stdout, _ := os.Create(stdLogFile)
 		logrus.Infof("生成容器:%s的日志文件:%s", containerName, stdLogFile)
 		cmd.Stdout = stdout
@@ -70,7 +70,7 @@ func sendInitCommand(comArray []string, writePipe *os.File) {
 	writePipe.Close()
 }
 
-func Run(tty bool, command []string, res *cgroup.ResouceConfig, volume string, containerName string,envs []string) {
+func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume string, containerName string,envs []string) {
 	//获取容器名称
 	containerName, id := containerInfo.GetContainerName(containerName)
 	//创建容器的父进程
