@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"mgface.com/aufs"
 	"mgface.com/containerInfo"
+	"strconv"
+	"syscall"
 )
 
 func RemoveContainer(containerName string) error {
@@ -18,6 +20,13 @@ func RemoveContainer(containerName string) error {
 	if cinfo.Status != containerInfo.STOP {
 		//logrus.Errorf("不能删除容器状态不为stopped,请先执行stop指令再删除.")
 		return errors.New("不能删除容器状态不为stopped,请先执行stop指令再删除.")
+	}
+	//暂停当前进程信息
+	pid := cinfo.Pid
+	ipid, _ := strconv.Atoi(pid)
+
+	if err := syscall.Kill(ipid, syscall.SIGTERM); err != nil {
+		return errors.New(fmt.Sprintf("杀掉进程%d失败,异常信息为:%v", ipid, err))
 	}
 
 	//删除当前目录

@@ -9,7 +9,6 @@ import (
 	"mgface.com/containerInfo"
 	"strconv"
 	"syscall"
-	"time"
 )
 
 func StartContainer(containerName string) error {
@@ -31,7 +30,7 @@ func StartContainer(containerName string) error {
 		return errors.New(fmt.Sprintf("重新开始一个停止的进程%d失败,异常信息为:%v", ipid, err))
 	}
 	containerinfo.Status = containerInfo.RUNNING
-	containerinfo.StoppedTime = time.Now().Format("2006-01-02 15:04:05")
+	containerinfo.StoppedTime = ""
 	content, _ = json.MarshalIndent(containerinfo, "", "   ") //美化输出缩进格式
 	if err := ioutil.WriteFile(configURL, content, 0622); err != nil {
 		logrus.Errorf("写文件%s失败，错误日志:%v", configURL, err)
