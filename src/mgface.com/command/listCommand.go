@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/urfave/cli"
 	"io/ioutil"
+	"mgface.com/constVar"
 	"mgface.com/containerInfo"
 	"os"
 	"text/tabwriter"
@@ -19,7 +20,7 @@ var ListCommand = cli.Command{
 }
 
 func listContainers() {
-	dirURL := fmt.Sprintf(containerInfo.DefaultInfoLocation, "")
+	dirURL := fmt.Sprintf(constVar.DefaultInfoLocation, "")
 	dirURL = dirURL[:len(dirURL)-1]
 	files, _ := ioutil.ReadDir(dirURL)
 	var containers []*containerInfo.ContainerInfo
