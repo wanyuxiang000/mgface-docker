@@ -20,7 +20,7 @@ func StopContainer(containerName string) error {
 	json.Unmarshal(content, &containerinfo)
 	pid := containerinfo.Pid
 	ipid, _ := strconv.Atoi(pid)
-	if err := syscall.Kill(ipid, syscall.SIGTERM); err != nil {
+	if err := syscall.Kill(ipid, syscall.SIGSTOP); err != nil {
 		logrus.Errorf("中断进程%d失败,异常信息为:%v", ipid, err)
 	}
 	containerinfo.Status = containerInfo.STOP
