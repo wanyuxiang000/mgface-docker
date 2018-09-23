@@ -25,7 +25,7 @@ type ContainerInfo struct {
 const (
 	RUNNING             = "running"
 	STOP                = "stopped"
-	Exit                = "exited"
+	//Exit                = "exited"
 	DefaultInfoLocation = "/var/run/mgface-docker/%s/"
 	ConfigName          = "config.json"
 	ContainerLog        = "container.log"
