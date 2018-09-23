@@ -21,6 +21,7 @@ type ContainerInfo struct {
 	StoppedTime string `json:"stoppedTime"` //停止时间
 	Status      string `json:"status"`      //容器状态
 	Volume      string `json:"volume"`      //挂载卷
+	PortMapping []string `json:"portmapping"` //端口映射
 }
 
 
