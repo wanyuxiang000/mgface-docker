@@ -27,6 +27,7 @@ func StopContainer(containerName string) error {
 	containerinfo.StoppedTime = time.Now().Format("2006-01-02 15:04:05")
 	//containerinfo.Pid = ""
 	content, _ = json.MarshalIndent(containerinfo, "", "   ") //美化输出缩进格式
+	content = append(content, []byte("\n")...)
 	if err := ioutil.WriteFile(configURL, content, 0622); err != nil {
 		logrus.Errorf("写文件%s失败，错误日志:%v", configURL, err)
 	}
