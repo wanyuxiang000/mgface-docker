@@ -11,8 +11,7 @@ var StopCommand = cli.Command{
 	Usage: "停止容器.",
 	Action: func(ctx *cli.Context) error {
 		if len(ctx.Args()) < 1 {
-			fmt.Println("参数错误，请使用stop containerName")
-			return nil
+			return fmt.Errorf("参数错误，请使用stop containerName")
 		}
 		containerName := ctx.Args().Get(0)
 		return container.StopContainer(containerName)

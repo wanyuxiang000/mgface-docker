@@ -7,9 +7,9 @@ import (
 )
 
 var NetworkCommand = cli.Command{
-	Name:  "network",
-	ShortName:"net",
-	Usage: "创建网络",
+	Name:      "network",
+	ShortName: "net",
+	Usage:     "创建网络",
 	Subcommands: []cli.Command{
 		{
 			Name:  "create",
@@ -44,16 +44,13 @@ var NetworkCommand = cli.Command{
 		},
 		{
 			Name:  "remove",
-			Usage: "remove container network",
+			Usage: "移除网络",
 			Action: func(context *cli.Context) error {
 				if len(context.Args()) < 1 {
 					return fmt.Errorf("Missing network name")
 				}
 				containerNet.InitNetworkAndNetdriver()
-				err := containerNet.DeleteNetwork(context.Args()[0])
-				if err != nil {
-					return fmt.Errorf("remove network error: %+v", err)
-				}
+				containerNet.DeleteNetwork(context.Args().Get(0))
 				return nil
 			},
 		},
