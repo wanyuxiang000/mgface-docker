@@ -11,9 +11,8 @@ var NetworkCommand = cli.Command{
 	Usage: "创建网络",
 	Subcommands: []cli.Command{
 		{
-			Name:        "create",
-			Usage:       "create a container network",
-			Description: "创建容器的网络",
+			Name:  "create",
+			Usage: "创建容器的网络",
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "driver",
@@ -35,7 +34,7 @@ var NetworkCommand = cli.Command{
 		},
 		{
 			Name:  "list",
-			Usage: "list container network",
+			Usage: "显示容器网络",
 			Action: func(context *cli.Context) error {
 				containerNet.InitNetworkAndNetdriver()
 				containerNet.ListNetwork()

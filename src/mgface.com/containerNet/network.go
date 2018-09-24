@@ -90,6 +90,7 @@ func InitNetworkAndNetdriver() error {
 	}
 
 	filepath.Walk(defaultNetworkPath, func(networkPath string, info os.FileInfo, err error) error {
+		logrus.Infof("读取到文件:%s", networkPath)
 		if strings.HasSuffix(networkPath, "/") {
 			return nil
 		}
@@ -123,8 +124,10 @@ func ListNetwork() {
 			nw.Driver,
 		)
 	}
-	w.Flush()
-	return
+	if err := w.Flush(); err != nil {
+		logrus.Errorf("Flush error %v", err)
+		return
+	}
 }
 
 func DeleteNetwork(networkName string) error {
