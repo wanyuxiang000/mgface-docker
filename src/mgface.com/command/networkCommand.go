@@ -6,14 +6,14 @@ import (
 	"mgface.com/containerNet"
 )
 
-var NetworkCommand  = cli.Command{
-	Name:"network",
-	Usage:"创建网络",
-	Subcommands: []cli.Command {
+var NetworkCommand = cli.Command{
+	Name:  "network",
+	Usage: "创建网络",
+	Subcommands: []cli.Command{
 		{
-			Name: "create",
-			Usage: "create a container network",
-			Description:"创建容器的网络",
+			Name:        "create",
+			Usage:       "create a container network",
+			Description: "创建容器的网络",
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "driver",
@@ -24,11 +24,12 @@ var NetworkCommand  = cli.Command{
 					Usage: "subnet cidr",
 				},
 			},
-			Action:func(context *cli.Context) error {
+			Action: func(context *cli.Context) error {
 				if len(context.Args()) < 1 {
 					return fmt.Errorf("Missing network name")
 				}
 				containerNet.Init()
+				fmt.Println("---" + context.Args()[0])
 				err := containerNet.CreateNetwork(context.String("driver"), context.String("subnet"), context.Args()[0])
 				if err != nil {
 					return fmt.Errorf("create network error: %+v", err)
@@ -37,18 +38,18 @@ var NetworkCommand  = cli.Command{
 			},
 		},
 		{
-			Name: "list",
+			Name:  "list",
 			Usage: "list container network",
-			Action:func(context *cli.Context) error {
+			Action: func(context *cli.Context) error {
 				containerNet.Init()
 				containerNet.ListNetwork()
 				return nil
 			},
 		},
 		{
-			Name: "remove",
+			Name:  "remove",
 			Usage: "remove container network",
-			Action:func(context *cli.Context) error {
+			Action: func(context *cli.Context) error {
 				if len(context.Args()) < 1 {
 					return fmt.Errorf("Missing network name")
 				}
