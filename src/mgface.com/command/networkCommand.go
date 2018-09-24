@@ -26,7 +26,7 @@ var NetworkCommand = cli.Command{
 			},
 			Action: func(context *cli.Context) error {
 				if len(context.Args()) < 1 {
-					return fmt.Errorf("Missing network name")
+					return fmt.Errorf("错误的network名称")
 				}
 				containerNet.InitNetworkAndNetdriver()
 				containerNet.CreateNetwork(context.String("driver"), context.String("subnet"), context.Args().Get(0))
@@ -47,7 +47,7 @@ var NetworkCommand = cli.Command{
 			Usage: "移除网络",
 			Action: func(context *cli.Context) error {
 				if len(context.Args()) < 1 {
-					return fmt.Errorf("Missing network name")
+					return fmt.Errorf("错误的network名称")
 				}
 				containerNet.InitNetworkAndNetdriver()
 				containerNet.DeleteNetwork(context.Args().Get(0))

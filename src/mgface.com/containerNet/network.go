@@ -130,20 +130,21 @@ func ListNetwork() {
 }
 
 func DeleteNetwork(networkName string) error {
-	nw, ok := networks[networkName]
+	network, ok := networks[networkName]
 	if !ok {
-		return fmt.Errorf("No Such Network: %s", networkName)
+		return fmt.Errorf("没有匹配到Network: %s", networkName)
 	}
 
-	if err := ipAllocator.Release(nw.IpNet, &nw.IpNet.IP); err != nil {
-		return fmt.Errorf("Error Remove Network gateway ip: %s", err)
+	if err := ipAllocator.Release(network.IpNet, &network.IpNet.IP); err != nil {
+		return fmt.Errorf("错误的释放Network的IP地址: %s", err)
 	}
 
-	if err := drivers[nw.Driver].Delete(*nw); err != nil {
-		return fmt.Errorf("Error Remove Network DriverError: %s", err)
+	if err := drivers[network.Driver].Delete(*network); err != nil {
+		return fmt.Errorf("错误的移除网络驱动: %s", err)
 	}
 
-	return nw.remove(DefaultNetworkPath)
+	//todo 同时需要移除subnet子网络
+	return network.remove(DefaultNetworkPath)
 }
 
 func enterContainerNetns(enLink *netlink.Link, cinfo *containerInfo.ContainerInfo) func() {
