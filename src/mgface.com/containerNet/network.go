@@ -74,7 +74,7 @@ func (network *Network) load(dumpPath string) error {
 	nwJson := make([]byte, 1024*1024)
 	n, _ := configFile.Read(nwJson)
 	if err := json.Unmarshal(nwJson[:n], network); err != nil {
-		logrus.Infof("解析文件 [%s] 失败,请核实信息.", dumpPath)
+		logrus.Infof("解析文件 [%s] 失败,请核实信息:%+v.", dumpPath,err)
 	}
 	return nil
 }

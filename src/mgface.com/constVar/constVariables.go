@@ -16,7 +16,7 @@ const (
 	ConfigName          = "config.json"
 	ContainerLog        = "container.log"
 	//网络
-    IpamDefaultAllocatorPath = "/var/run/mgface-docker-net/network/ipam/subnet.json"
+    IpamDefaultAllocatorPath = "/var/run/mgface-docker-net/ipam/subnet.json"
     //网络路径的存放位置
 	DefaultNetworkPath = "/var/run/mgface-docker-net/network/"
 
