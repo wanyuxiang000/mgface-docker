@@ -48,10 +48,11 @@ func (network *Network) dump(dumpPath string) error {
 	}
 
 	nwPath := path.Join(dumpPath, network.Name)
-	nwFile, _ := os.OpenFile(nwPath, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0644)
-	defer nwFile.Close()
-	nwJson, _ := json.Marshal(network)
-	nwFile.Write(nwJson)
+	networkFile, _ := os.OpenFile(nwPath, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0644)
+	defer networkFile.Close()
+	content, _ := json.MarshalIndent(network, "", "  ")
+	content = append(content, []byte("\n")...)
+	networkFile.Write(content)
 	return nil
 }
 

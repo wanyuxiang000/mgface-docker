@@ -29,8 +29,7 @@ var NetworkCommand = cli.Command{
 					return fmt.Errorf("Missing network name")
 				}
 				containerNet.InitNetworkAndNetdriver()
-				fmt.Println("---" + context.Args()[0])
-				containerNet.CreateNetwork(context.String("driver"), context.String("subnet"), context.Args()[0])
+				containerNet.CreateNetwork(context.String("driver"), context.String("subnet"), context.Args().Get(0))
 				return nil
 			},
 		},
