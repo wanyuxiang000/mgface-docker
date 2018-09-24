@@ -33,9 +33,9 @@ type Endpoint struct {
 }
 
 type Network struct {
-	Name    string
-	IpRange *net.IPNet
-	Driver  string
+	Name   string
+	IpNet  *net.IPNet
+	Driver string
 }
 
 func (network *Network) dump(dumpPath string) error {
@@ -97,11 +97,7 @@ func InitNetworkAndNetdriver() error {
 		network := &Network{
 			Name: networkName,
 		}
-
-		if err := network.load(networkPath); err != nil {
-			logrus.Errorf("error load network: %s", err)
-		}
-
+		network.load(networkPath)
 		networks[networkName] = network
 		return nil
 	})
@@ -123,7 +119,7 @@ func ListNetwork() {
 	for _, nw := range networks {
 		fmt.Fprintf(w, "%s\t%s\t%s\n",
 			nw.Name,
-			nw.IpRange.String(),
+			nw.IpNet.String(),
 			nw.Driver,
 		)
 	}
@@ -139,7 +135,7 @@ func DeleteNetwork(networkName string) error {
 		return fmt.Errorf("No Such Network: %s", networkName)
 	}
 
-	if err := ipAllocator.Release(nw.IpRange, &nw.IpRange.IP); err != nil {
+	if err := ipAllocator.Release(nw.IpNet, &nw.IpNet.IP); err != nil {
 		return fmt.Errorf("Error Remove Network gateway ip: %s", err)
 	}
 
@@ -190,7 +186,7 @@ func configEndpointIpAddressAndRoute(ep *Endpoint, cinfo *containerInfo.Containe
 
 	defer enterContainerNetns(&peerLink, cinfo)()
 
-	interfaceIP := *ep.Network.IpRange
+	interfaceIP := *ep.Network.IpNet
 	interfaceIP.IP = ep.IPAddress
 
 	if err = setInterfaceIP(ep.Device.PeerName, interfaceIP.String()); err != nil {
@@ -209,7 +205,7 @@ func configEndpointIpAddressAndRoute(ep *Endpoint, cinfo *containerInfo.Containe
 
 	defaultRoute := &netlink.Route{
 		LinkIndex: peerLink.Attrs().Index,
-		Gw:        ep.Network.IpRange.IP,
+		Gw:        ep.Network.IpNet.IP,
 		Dst:       cidr,
 	}
 
@@ -247,7 +243,7 @@ func Connect(networkName string, cinfo *containerInfo.ContainerInfo) error {
 	}
 
 	// 分配容器IP地址
-	ip, err := ipAllocator.Allocate(network.IpRange)
+	ip, err := ipAllocator.Allocate(network.IpNet)
 	if err != nil {
 		return err
 	}

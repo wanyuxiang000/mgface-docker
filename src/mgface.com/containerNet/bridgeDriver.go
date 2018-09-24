@@ -21,9 +21,9 @@ func (driver *BridgeNetworkDriver) Create(subnet string, name string) (*Network,
 	ip, ipNet, _ := net.ParseCIDR(subnet)
 	ipNet.IP = ip
 	network := &Network{
-		Name:    name,
-		IpRange: ipNet,
-		Driver:  driver.Name(),
+		Name:   name,
+		IpNet:  ipNet,
+		Driver: driver.Name(),
 	}
 	err := driver.initBridge(network)
 	if err != nil {
@@ -76,8 +76,8 @@ func (driver *BridgeNetworkDriver) initBridge(network *Network) error {
 	}
 
 	//2.设置Bridge设备的地址和路由
-	gatewayIP := *network.IpRange
-	gatewayIP.IP = network.IpRange.IP
+	gatewayIP := *network.IpNet
+	gatewayIP.IP = network.IpNet.IP
 
 	if err := setInterfaceIP(bridgeName, gatewayIP.String()); err != nil {
 		return fmt.Errorf("Error assigning address: %s on bridge: %s with an error of: %v", gatewayIP, bridgeName, err)
@@ -88,7 +88,7 @@ func (driver *BridgeNetworkDriver) initBridge(network *Network) error {
 	}
 
 	//4.设置iptabels的SNAT规则
-	if err := setupIPTables(bridgeName, network.IpRange); err != nil {
+	if err := setupIPTables(bridgeName, network.IpNet); err != nil {
 		return fmt.Errorf("Error setting iptables for %s: %v", bridgeName, err)
 	}
 
