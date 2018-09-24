@@ -76,7 +76,7 @@ func (network *Network) load(dumpPath string) error {
 	return nil
 }
 
-func Init() error {
+func InitNetworkAndNetdriver() error {
 	var bridgeDriver = BridgeNetworkDriver{}
 	drivers[bridgeDriver.Name()] = &bridgeDriver
 
@@ -108,11 +108,11 @@ func Init() error {
 }
 
 func CreateNetwork(driver, subnet, name string) error {
-	_, cidr, _ := net.ParseCIDR(subnet)
-	ip, _ := ipAllocator.Allocate(cidr)
-	cidr.IP = ip
+	_, ipNet, _ := net.ParseCIDR(subnet)
+	ip, _ := ipAllocator.Allocate(ipNet)
+	ipNet.IP = ip
 
-	network, _ := drivers[driver].Create(cidr.String(), name)
+	network, _ := drivers[driver].Create(ipNet.String(), name)
 	return network.dump(defaultNetworkPath)
 }
 

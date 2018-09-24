@@ -28,12 +28,9 @@ var NetworkCommand = cli.Command{
 				if len(context.Args()) < 1 {
 					return fmt.Errorf("Missing network name")
 				}
-				containerNet.Init()
+				containerNet.InitNetworkAndNetdriver()
 				fmt.Println("---" + context.Args()[0])
-				err := containerNet.CreateNetwork(context.String("driver"), context.String("subnet"), context.Args()[0])
-				if err != nil {
-					return fmt.Errorf("create network error: %+v", err)
-				}
+				containerNet.CreateNetwork(context.String("driver"), context.String("subnet"), context.Args()[0])
 				return nil
 			},
 		},
@@ -41,7 +38,7 @@ var NetworkCommand = cli.Command{
 			Name:  "list",
 			Usage: "list container network",
 			Action: func(context *cli.Context) error {
-				containerNet.Init()
+				containerNet.InitNetworkAndNetdriver()
 				containerNet.ListNetwork()
 				return nil
 			},
@@ -53,7 +50,7 @@ var NetworkCommand = cli.Command{
 				if len(context.Args()) < 1 {
 					return fmt.Errorf("Missing network name")
 				}
-				containerNet.Init()
+				containerNet.InitNetworkAndNetdriver()
 				err := containerNet.DeleteNetwork(context.Args()[0])
 				if err != nil {
 					return fmt.Errorf("remove network error: %+v", err)

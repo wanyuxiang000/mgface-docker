@@ -18,11 +18,11 @@ func (driver *BridgeNetworkDriver) Name() string {
 
 func (driver *BridgeNetworkDriver) Create(subnet string, name string) (*Network, error) {
 	//通过net包中的net.ParseCIDR方法,取到网段的字符串中的网关IP地址和网络IP段
-	ip, ipRange, _ := net.ParseCIDR(subnet)
-	ipRange.IP = ip
+	ip, ipNet, _ := net.ParseCIDR(subnet)
+	ipNet.IP = ip
 	network := &Network{
 		Name:    name,
-		IpRange: ipRange,
+		IpRange: ipNet,
 		Driver:  driver.Name(),
 	}
 	err := driver.initBridge(network)
