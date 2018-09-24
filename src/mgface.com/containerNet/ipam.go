@@ -49,8 +49,9 @@ func (ipam *IPAM) dump() error {
 	//打开存储文件,os.O_TRUNC表示如果存在则清空os.O_CREATE表示如果不存在则创建
 	subnetConfigFile, _ := os.OpenFile(ipam.SubnetAllocatorPath, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0644)
 	defer subnetConfigFile.Close()
-	ipamConfigJson, _ := json.Marshal(ipam.Subnets)
-	subnetConfigFile.Write(ipamConfigJson)
+	content, _ := json.Marshal(ipam.Subnets)
+	content = append(content,[]byte("\n")...)
+	subnetConfigFile.Write(content)
 	return nil
 }
 
