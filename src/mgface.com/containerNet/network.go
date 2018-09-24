@@ -6,6 +6,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
+	. "mgface.com/constVar"
 	"mgface.com/containerInfo"
 	"net"
 	"os"
@@ -18,7 +19,6 @@ import (
 )
 
 var (
-	defaultNetworkPath = "/var/run/mgface-docker/network/network/"
 	drivers            = map[string]NetworkDriver{}
 	networks           = map[string]*Network{}
 )
@@ -81,15 +81,15 @@ func InitNetworkAndNetdriver() error {
 	var bridgeDriver = BridgeNetworkDriver{}
 	drivers[bridgeDriver.Name()] = &bridgeDriver
 
-	if _, err := os.Stat(defaultNetworkPath); err != nil {
+	if _, err := os.Stat(DefaultNetworkPath); err != nil {
 		if os.IsNotExist(err) {
-			os.MkdirAll(defaultNetworkPath, 0644)
+			os.MkdirAll(DefaultNetworkPath, 0644)
 		} else {
 			return err
 		}
 	}
 
-	filepath.Walk(defaultNetworkPath, func(networkPath string, info os.FileInfo, err error) error {
+	filepath.Walk(DefaultNetworkPath, func(networkPath string, info os.FileInfo, err error) error {
 		logrus.Infof("读取到文件:%s", networkPath)
 		if strings.HasSuffix(networkPath, "/") {
 			return nil
@@ -111,7 +111,7 @@ func CreateNetwork(driver, subnet, name string) error {
 	ipNet.IP = ip
 
 	network, _ := drivers[driver].Create(ipNet.String(), name)
-	return network.dump(defaultNetworkPath)
+	return network.dump(DefaultNetworkPath)
 }
 
 func ListNetwork() {
@@ -144,7 +144,7 @@ func DeleteNetwork(networkName string) error {
 		return fmt.Errorf("Error Remove Network DriverError: %s", err)
 	}
 
-	return nw.remove(defaultNetworkPath)
+	return nw.remove(DefaultNetworkPath)
 }
 
 func enterContainerNetns(enLink *netlink.Link, cinfo *containerInfo.ContainerInfo) func() {

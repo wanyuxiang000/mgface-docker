@@ -2,7 +2,7 @@ package containerNet
 
 import (
 	"encoding/json"
-	"mgface.com/constVar"
+	. "mgface.com/constVar"
 	"net"
 	"os"
 	"path"
@@ -18,7 +18,7 @@ type IPAM struct {
 }
 
 var ipAllocator = &IPAM{
-	SubnetAllocatorPath: constVar.IpamDefaultAllocatorPath,
+	SubnetAllocatorPath: IpamDefaultAllocatorPath,
 }
 
 func (ipam *IPAM) load() error {
