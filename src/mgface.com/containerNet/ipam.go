@@ -17,7 +17,7 @@ type IPAM struct {
 	Subnets *map[string]string
 }
 
-var ipAllocator = &IPAM{
+var ipAddressManage = &IPAM{
 	SubnetAllocatorPath: IpamDefaultAllocatorPath,
 }
 

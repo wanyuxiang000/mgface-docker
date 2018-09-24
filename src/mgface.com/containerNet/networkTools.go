@@ -110,7 +110,7 @@ func Connect(networkName string, cinfo *containerInfo.ContainerInfo) error {
 	}
 
 	// 分配容器IP地址
-	ip, err := ipAllocator.Allocate(network.IpNet)
+	ip, err := ipAddressManage.Allocate(network.IpNet)
 	if err != nil {
 		return err
 	}

@@ -42,7 +42,7 @@ func InitNetworkAndNetdriver() error {
 
 func CreateNetwork(driver, subnet, name string) error {
 	_, ipNet, _ := net.ParseCIDR(subnet)
-	ip, _ := ipAllocator.Allocate(ipNet)
+	ip, _ := ipAddressManage.Allocate(ipNet)
 	ipNet.IP = ip
 
 	network, _ := drivers[driver].Create(ipNet.String(), name)
@@ -71,19 +71,17 @@ func DeleteNetwork(networkName string) error {
 		delete(networks,networkName)
 	}
 
-	if err := ipAllocator.Release(network.IpNet, &network.IpNet.IP); err != nil {
+	if err := ipAddressManage.Release(network.IpNet, &network.IpNet.IP); err != nil {
 		return fmt.Errorf("错误的释放Network的IP地址: %s", err)
 	}
 
 	if err := drivers[network.Driver].Delete(*network); err != nil {
 		return fmt.Errorf("错误的移除网络驱动: %s", err)
 	}
-	
-
 	//删除ipam数据
 	_, subnet, _ := net.ParseCIDR(network.IpNet.String())
-	delete(*ipAllocator.Subnets,subnet.String())
-	ipAllocator.dump()
+	delete(*ipAddressManage.Subnets,subnet.String())
+	ipAddressManage.dump()
 	//移除subnet子网络文件
 	return network.remove(DefaultNetworkPath)
 }
