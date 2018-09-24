@@ -66,6 +66,9 @@ func DeleteNetwork(networkName string) error {
 	network, ok := networks[networkName]
 	if !ok {
 		return fmt.Errorf("没有匹配到Network: %s", networkName)
+	}else {
+		//删除子网络
+		delete(networks,networkName)
 	}
 
 	if err := ipAllocator.Release(network.IpNet, &network.IpNet.IP); err != nil {
@@ -75,7 +78,12 @@ func DeleteNetwork(networkName string) error {
 	if err := drivers[network.Driver].Delete(*network); err != nil {
 		return fmt.Errorf("错误的移除网络驱动: %s", err)
 	}
+	
 
-	//todo 同时需要移除subnet子网络
+	//删除ipam数据
+	_, subnet, _ := net.ParseCIDR(network.IpNet.String())
+	delete(*ipAllocator.Subnets,subnet.String())
+	ipAllocator.dump()
+	//移除subnet子网络文件
 	return network.remove(DefaultNetworkPath)
 }

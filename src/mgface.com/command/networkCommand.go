@@ -43,8 +43,11 @@ var NetworkCommand = cli.Command{
 			},
 		},
 		{
-			Name:  "remove",
-			Usage: "移除网络",
+			Name:      "remove",
+			ShortName: "rm",
+			Usage:     "移除网络",
+			Description: `查看 iptables 配置的 MASQUERADE 规则
+                         sudo iptables -t nat -vnL POSTROUTING`,
 			Action: func(context *cli.Context) error {
 				if len(context.Args()) < 1 {
 					return fmt.Errorf("错误的network名称")
