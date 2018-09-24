@@ -19,8 +19,8 @@ import (
 )
 
 var (
-	drivers            = map[string]NetworkDriver{}
-	networks           = map[string]*Network{}
+	drivers  = map[string]NetworkDriver{}
+	networks = map[string]*Network{}
 )
 
 type Endpoint struct {
@@ -69,11 +69,13 @@ func (network *Network) remove(dumpPath string) error {
 }
 
 func (network *Network) load(dumpPath string) error {
-	nwConfigFile, _ := os.Open(dumpPath)
-	defer nwConfigFile.Close()
+	configFile, _ := os.Open(dumpPath)
+	defer configFile.Close()
 	nwJson := make([]byte, 1024*1024)
-	n, _ := nwConfigFile.Read(nwJson)
-	json.Unmarshal(nwJson[:n], network)
+	n, _ := configFile.Read(nwJson)
+	if err := json.Unmarshal(nwJson[:n], network); err != nil {
+		logrus.Infof("解析文件 [%s] 失败,请核实信息.", dumpPath)
+	}
 	return nil
 }
 
@@ -116,18 +118,15 @@ func CreateNetwork(driver, subnet, name string) error {
 
 func ListNetwork() {
 	w := tabwriter.NewWriter(os.Stdout, 12, 1, 3, ' ', 0)
-	fmt.Fprint(w, "NAME\tIpNet\tDriver\n")
-	for _, nw := range networks {
+	fmt.Fprint(w, "网络名称\tIP网络\t网络驱动\n")
+	for _, network := range networks {
 		fmt.Fprintf(w, "%s\t%s\t%s\n",
-			nw.Name,
-			nw.IpNet.String(),
-			nw.Driver,
+			network.Name,
+			network.IpNet.String(),
+			network.Driver,
 		)
 	}
-	if err := w.Flush(); err != nil {
-		logrus.Errorf("Flush error %v", err)
-		return
-	}
+	w.Flush()
 }
 
 func DeleteNetwork(networkName string) error {

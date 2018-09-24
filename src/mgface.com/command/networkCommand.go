@@ -8,6 +8,7 @@ import (
 
 var NetworkCommand = cli.Command{
 	Name:  "network",
+	ShortName:"net",
 	Usage: "创建网络",
 	Subcommands: []cli.Command{
 		{
@@ -16,11 +17,11 @@ var NetworkCommand = cli.Command{
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "driver",
-					Usage: "network driver",
+					Usage: "设置driver",
 				},
 				cli.StringFlag{
 					Name:  "subnet",
-					Usage: "subnet 子网络",
+					Usage: "设置subnet子网络",
 				},
 			},
 			Action: func(context *cli.Context) error {
