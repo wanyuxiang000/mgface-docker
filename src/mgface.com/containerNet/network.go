@@ -115,7 +115,7 @@ func CreateNetwork(driver, subnet, name string) error {
 
 func ListNetwork() {
 	w := tabwriter.NewWriter(os.Stdout, 12, 1, 3, ' ', 0)
-	fmt.Fprint(w, "NAME\tIpRange\tDriver\n")
+	fmt.Fprint(w, "NAME\tIpNet\tDriver\n")
 	for _, nw := range networks {
 		fmt.Fprintf(w, "%s\t%s\t%s\n",
 			nw.Name,
@@ -123,10 +123,8 @@ func ListNetwork() {
 			nw.Driver,
 		)
 	}
-	if err := w.Flush(); err != nil {
-		logrus.Errorf("Flush error %v", err)
-		return
-	}
+	w.Flush()
+	return
 }
 
 func DeleteNetwork(networkName string) error {

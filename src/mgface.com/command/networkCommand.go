@@ -21,7 +21,7 @@ var NetworkCommand = cli.Command{
 				},
 				cli.StringFlag{
 					Name:  "subnet",
-					Usage: "subnet cidr",
+					Usage: "subnet 子网络",
 				},
 			},
 			Action: func(context *cli.Context) error {
