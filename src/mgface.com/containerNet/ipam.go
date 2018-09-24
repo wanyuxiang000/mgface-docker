@@ -2,24 +2,23 @@ package containerNet
 
 import (
 	"encoding/json"
+	"mgface.com/constVar"
 	"net"
 	"os"
 	"path"
 	"strings"
 )
 
-const ipamDefaultAllocatorPath = "/var/run/mgface-docker/network/ipam/subnet.json"
-
 //存放IP地址分配信息
 type IPAM struct {
 	//分配文件存放位置
 	SubnetAllocatorPath string
-	//网段和位图算法的数组map,key是网段,value是分配的位图数组
-	Subnets map[string]string
+	//key是网段,value是分配的位图数组
+	Subnets *map[string]string
 }
 
 var ipAllocator = &IPAM{
-	SubnetAllocatorPath: ipamDefaultAllocatorPath,
+	SubnetAllocatorPath: constVar.IpamDefaultAllocatorPath,
 }
 
 func (ipam *IPAM) load() error {
@@ -32,7 +31,7 @@ func (ipam *IPAM) load() error {
 	}
 	subnetConfigFile, _ := os.Open(ipam.SubnetAllocatorPath)
 	defer subnetConfigFile.Close()
-	subnetJson := make([]byte, 1024*8)
+	subnetJson := make([]byte, 1024*1024)
 	n, _ := subnetConfigFile.Read(subnetJson)
 	json.Unmarshal(subnetJson[:n], ipam.Subnets)
 	return nil
@@ -57,28 +56,30 @@ func (ipam *IPAM) dump() error {
 
 func (ipam *IPAM) Allocate(subnet *net.IPNet) (ip net.IP, err error) {
 	//存放网段中地址分配信息的数组
-	ipam.Subnets = make(map[string]string)
+	ipam.Subnets = &map[string]string{}
 	// 从文件中加载已经分配的网段信息
 	ipam.load()
 	_, subnet, _ = net.ParseCIDR(subnet.String())
 	//net.IPNet.Mask.Size()函数会返回网段的子网掩码的总长度和网段前面的固定位的长度
 	//比如“127.0.0.1/8”网段的子网掩码是"255.0.0.0"
-	//那么Mask.Size()的返回值就是前面 255 所对应的位数和总位数,即8和24
+	//那么Mask.Size()的返回值就是前面 255 所对应的位数和总位数,即8和32
 	ones, bits := subnet.Mask.Size()
+
+	ipBits, exist := (*ipam.Subnets)[subnet.String()]
 	//如果之前没有分配过这个网段,则初始化网段的分配配置
-	if _, exist := ipam.Subnets[subnet.String()]; !exist {
+	if !exist {
 		//用"0"填满这个网段的配置,1<<uint8(bits-ones)表示这个网段中有多少个可用地址
 		//bits-ones是子网掩码后面的网络位数， 2^(bits-ones)表示网段中的可用IP数
 		//而 2^(bits-ones)等价于1<<uint8(bits-ones)
-		ipam.Subnets[subnet.String()] = strings.Repeat("0", 1<<uint8(bits-ones))
+		ipBits = strings.Repeat("0", 1<<uint8(bits-ones))
 	}
-	ipBits:=ipam.Subnets[subnet.String()]
+
 	for c := range ipBits {
 		if ipBits[c] == '0' {
 			//Go的字符串,创建之后就不能修改,所以通过转换成byte数组,修改后再转换成字符串赋值
 			ipalloc := []byte(ipBits)
 			ipalloc[c] = '1'
-			ipBits = string(ipalloc)
+			(*ipam.Subnets)[subnet.String()] = string(ipalloc)
 			//这里的IP为初始IP,比如对于网段192.168.0.0/16,这里就是192.168.0.0
 			ip = subnet.IP
 			//通过网段的IP与上面的偏移相加计算出分配的IP地址，由于IP地址是uint的一个数组，
@@ -98,7 +99,7 @@ func (ipam *IPAM) Allocate(subnet *net.IPNet) (ip net.IP, err error) {
 }
 
 func (ipam *IPAM) Release(subnet *net.IPNet, ipaddr *net.IP) error {
-	ipam.Subnets = make(map[string]string)
+	ipam.Subnets = &map[string]string{}
 	_, subnet, _ = net.ParseCIDR(subnet.String())
 	ipam.load()
 	c := 0
@@ -106,11 +107,13 @@ func (ipam *IPAM) Release(subnet *net.IPNet, ipaddr *net.IP) error {
 	releaseIP := ipaddr.To4()
 	releaseIP[3] -= 1
 	for t := uint(4); t > 0; t -= 1 {
+		/*与分配IP相反,释放IP获得索引的方式是IP地址的每一位相减之后分别左移将对应的数值加
+		到索引上。*/
 		c += int(releaseIP[t-1]-subnet.IP[t-1]) << ((4 - t) * 8)
 	}
-	ipalloc := []byte(ipam.Subnets[subnet.String()])
+	ipalloc := []byte((*ipam.Subnets)[subnet.String()])
 	ipalloc[c] = '0'
-	ipam.Subnets[subnet.String()] = string(ipalloc)
+	(*ipam.Subnets)[subnet.String()] = string(ipalloc)
 	ipam.dump()
 	return nil
 }

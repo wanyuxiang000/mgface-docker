@@ -16,6 +16,6 @@ const (
 	ConfigName          = "config.json"
 	ContainerLog        = "container.log"
 	//网络
-
+    IpamDefaultAllocatorPath = "/var/run/mgface-docker/network/ipam/subnet.json"
 
 )
