@@ -19,5 +19,4 @@ const (
     IpamDefaultAllocatorPath = "/var/run/mgface-docker-net/ipam/subnet.json"
     //网络路径的存放位置
 	DefaultNetworkPath = "/var/run/mgface-docker-net/network/"
-
 )
