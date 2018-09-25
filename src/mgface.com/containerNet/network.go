@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	drivers  = map[string]NetworkDriver{}
+	drivers  = map[string]driver{}
 	networks = map[string]*Network{}
 )
 
