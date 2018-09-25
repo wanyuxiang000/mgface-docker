@@ -2,6 +2,7 @@ package containerNet
 
 import (
 	"encoding/json"
+	"github.com/Sirupsen/logrus"
 	. "mgface.com/constVar"
 	"net"
 	"os"
@@ -22,6 +23,7 @@ var ipAddressManage = &IPAM{
 }
 
 func (ipam *IPAM) load() error {
+	logrus.Infof("加载ipam文件:%s",ipam.SubnetAllocatorPath)
 	if _, err := os.Stat(ipam.SubnetAllocatorPath); err != nil {
 		if os.IsNotExist(err) {
 			return nil

@@ -78,24 +78,24 @@ func (driver *BridgeNetworkDriver) initBridge(network *Network) error {
 	// 1. 创建 Bridge 虚拟设备
 	bridgeName := network.Name
 	if err := createBridgeInterface(bridgeName); err != nil {
-		return fmt.Errorf("Error add bridge： %s, Error: %v", bridgeName, err)
+		return fmt.Errorf("错误的添加bridge： %s, Error: %v", bridgeName, err)
 	}
 
 	//2.设置Bridge设备的地址和路由
-	gatewayIP := *network.IpNet
-	gatewayIP.IP = network.IpNet.IP
+	ipNet := *network.IpNet
+	ipNet.IP = network.IpNet.IP
 
-	if err := setInterfaceIP(bridgeName, gatewayIP.String()); err != nil {
-		return fmt.Errorf("Error assigning address: %s on bridge: %s with an error of: %v", gatewayIP, bridgeName, err)
+	if err := setInterfaceIP(bridgeName, ipNet.String()); err != nil {
+		return fmt.Errorf("错误的分配一个地址: %s 在 bridge: %s 异常信息: %v", ipNet, bridgeName, err)
 	}
 	//3.启动Bridge设备
 	if err := setInterfaceUP(bridgeName); err != nil {
-		return fmt.Errorf("Error set bridge up: %s, Error: %v", bridgeName, err)
+		return fmt.Errorf("bridge %s 设备启动发生错误: %+v", bridgeName, err)
 	}
 
 	//4.设置iptabels的SNAT规则
 	if err := setupIPTables(bridgeName, network.IpNet); err != nil {
-		return fmt.Errorf("Error setting iptables for %s: %v", bridgeName, err)
+		return fmt.Errorf("%s 错误的设置iptables异常信息为: %v", bridgeName, err)
 	}
 
 	return nil
@@ -157,7 +157,7 @@ func setInterfaceUP(interfaceName string) error {
 	iface, _ := netlink.LinkByName(interfaceName)
 
 	if err := netlink.LinkSetUp(iface); err != nil {
-		return fmt.Errorf("Error enabling interface for %s: %v", interfaceName, err)
+		return fmt.Errorf("错误的启用设备 %s: %v", interfaceName, err)
 	}
 	return nil
 }

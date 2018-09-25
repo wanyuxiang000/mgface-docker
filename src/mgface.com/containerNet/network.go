@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	drivers  = map[string]driver{}
+	drivers  = map[string]Driver{}
 	networks = map[string]*Network{}
 )
 
@@ -62,10 +62,10 @@ func (network *Network) remove(dumpPath string) error {
 func (network *Network) load(dumpPath string) error {
 	configFile, _ := os.Open(dumpPath)
 	defer configFile.Close()
-	nwJson := make([]byte, 1024*1024)
-	n, _ := configFile.Read(nwJson)
-	if err := json.Unmarshal(nwJson[:n], network); err != nil {
-		logrus.Infof("解析文件 [%s] 失败,请核实信息:%+v.", dumpPath,err)
+	content := make([]byte, 1024*1024)
+	n, _ := configFile.Read(content)
+	if err := json.Unmarshal(content[:n], network); err != nil {
+		logrus.Infof("解析文件 [%s] 失败,请核实信息:%+v.", dumpPath, err)
 	}
 	return nil
 }

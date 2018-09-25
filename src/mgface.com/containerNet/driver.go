@@ -1,7 +1,7 @@
 package containerNet
 
 
-type driver interface {
+type Driver interface {
 	Name() string
 	Create(subnet string, name string) (*Network, error)
 	Delete(network Network) error
