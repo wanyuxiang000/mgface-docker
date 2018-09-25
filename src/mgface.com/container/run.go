@@ -7,14 +7,16 @@ import (
 	"mgface.com/cgroup"
 	"mgface.com/constVar"
 	"mgface.com/containerInfo"
+	"mgface.com/containerNet"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
 )
 
-func newParentProcess(tty bool, volume string, containerName string,envs []string) (*exec.Cmd, *os.File) {
+func newParentProcess(tty bool, volume string, containerName string, envs []string) (*exec.Cmd, *os.File) {
 	r, w, _ := os.Pipe()
 	args := []string{"init"}
 	cmd := exec.Command("/proc/self/exe", args...)
@@ -51,15 +53,15 @@ func newParentProcess(tty bool, volume string, containerName string,envs []strin
 	cmd.ExtraFiles = []*os.File{r}
 
 	//设置cmd的目录
-	cmd.Dir = fmt.Sprintf(constVar.Cmd,containerName)
+	cmd.Dir = fmt.Sprintf(constVar.Cmd, containerName)
 
 	//设置环境变量
 	//默认情况下,新启动进程的环境变量都是继承于原来父进程的,但是如果手动指定了环境变量,那么就会覆盖掉原来继承自父进程的变量。由于在容器的进程中，
 	//有时候还需要使用原来父进程的环境变量,比如PATH等,因此这里会使用os.Environ()来获取宿主机的环境变量,然后把自定义的变量加进去。
-	cmd.Env = append(os.Environ(),envs...)
+	cmd.Env = append(os.Environ(), envs...)
 
 	//设置好容器进程的挂载点(作为容器的文件系统)
-	aufs.NewFileSystem(volume,containerName)
+	aufs.NewFileSystem(volume, containerName)
 	return cmd, w
 }
 
@@ -70,20 +72,36 @@ func sendInitCommand(comArray []string, writePipe *os.File) {
 	writePipe.Close()
 }
 
-func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume string, containerName string,envs []string) {
+func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume string, containerName string, envs []string, network string, portMapping []string) {
 	//获取容器名称
 	containerName, id := containerInfo.GetContainerName(containerName)
-	//创建容器的父进程
-	parent, writePipe := newParentProcess(tty, volume, containerName,envs)
+	//获取创建容器的父进程
+	parent, writePipe := newParentProcess(tty, volume, containerName, envs)
 	if err := parent.Start(); err != nil {
 		logrus.Fatal("发生错误:%s", err)
 	}
-
+	//获取容器的PID
+	pid := parent.Process.Pid
 	//记录容器信息
-	containerInfo.RecordContainerInfo(parent.Process.Pid, command, containerName, id,volume)
+	containerInfo.RecordContainerInfo(pid, command, containerName, id, volume)
 
 	//设置Cgroup
-	cgroup.SetCgroup(fmt.Sprintf(constVar.CgroupName,containerName), res, parent.Process.Pid)
+	cgroup.SetCgroup(fmt.Sprintf(constVar.CgroupName, containerName), res, pid)
+
+	//设置容器连接网络
+	if network != "" {
+		//初始化容器网络和驱动
+		containerNet.InitNetworkAndNetdriver()
+
+		containerInfo := &containerInfo.ContainerInfo{
+			Id:          id,
+			Pid:         strconv.Itoa(pid),
+			Name:        containerName,
+			PortMapping: portMapping,
+		}
+
+		containerNet.Connect(network, containerInfo)
+	}
 
 	//向容器进程进行通信
 	sendInitCommand(command, writePipe)
@@ -96,7 +114,7 @@ func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume 
 		//删除容器信息
 		containerInfo.DeleteContainerInfo(containerName)
 		//删除挂载点数据
-		aufs.DeleteFileSystem(volume,containerName)
+		aufs.DeleteFileSystem(volume, containerName)
 	} else {
 		logrus.Infof("不启用tty,父进程直接运行完毕,子进程进行detach分离给操作系统的init托管.")
 	}

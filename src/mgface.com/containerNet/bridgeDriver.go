@@ -46,12 +46,12 @@ func (driver *BridgeNetworkDriver) Connect(network *Network, endpoint *Endpoint)
 	}
 	//创建 Veth 接口的配置
 	la := netlink.NewLinkAttrs()
-	//由于 Linux 接口名的限制，名字取 endpoint ID 的前 5 位
+	//由于 Linux 接口名的限制,名字取endpoint ID的前5位
 	la.Name = endpoint.ID[:5]
-	//通过设置Veth接口的master属性，设置这个Veth的一端挂载到网络对应的Linux Bridge上
+	//通过设置Veth接口的master属性,设置这个Veth的一端挂载到网络对应的Linux Bridge上
 	la.MasterIndex = bridge.Attrs().Index
-	//创建 Veth 对象，通过 PeerName 配置 Veth 另外一端的接口名
-	//配置 Veth 另外一端的名字 cif - {endpoint ID 的前 5 位｝
+	//创建Veth对象,通过PeerName配置Veth另外一端的接口名
+	//配置Veth另外一端的名字 cif - {endpoint ID 的前 5 位｝
 	endpoint.Device = netlink.Veth{
 		LinkAttrs: la,
 		PeerName:  "cif-" + la.Name,
@@ -122,14 +122,10 @@ func createBridgeInterface(bridgeName string) error {
 	return nil
 }
 
-//设置一个网络接口的IP地址,例如setInterfaceIP("testbridge","192.168.0.1/24")
-func setInterfaceIP(bridgeName string, rawIP string) error {
-	iface, _ := netlink.LinkByName(bridgeName)
-	/*
-		 由于 netlink.ParseIPNet是对net.ParseCIDR的一个封装,因此可以将 net.ParseCIDR的返回值的IP和net整合
-		返回值中的ipNet既包含了网段的信息,192.168.0.0/24,也包含了原始的ip 192.168.0.1
-	*/
-	ipNet, _ := netlink.ParseIPNet(rawIP)
+//设置一个网络接口的IP地址
+func setInterfaceIP(name string, ipRange string) error {
+	iface, _ := netlink.LinkByName(name)
+	ipNet, _ := netlink.ParseIPNet(ipRange)
 	addr := &netlink.Addr{IPNet: ipNet}
 	//调用netlink的AddrAdd方法,配置Linux Bridge的地址和路由表。
 	return netlink.AddrAdd(iface, addr)

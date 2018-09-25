@@ -42,6 +42,14 @@ var flag = []cli.Flag{
 		Name:  "e",
 		Usage: "设置环境变量.",
 	},
+	cli.StringFlag{
+		Name:  "net",
+		Usage: "指定连接的网络",
+	},
+	cli.StringFlag{
+		Name:  "p",
+		Usage: "端口映射",
+	},
 }
 
 var RunCommand = cli.Command{
@@ -80,8 +88,13 @@ var RunCommand = cli.Command{
 		volume := ctx.String("v")
 
 		//获得环境变量
-		envs:=ctx.StringSlice("e")
-		container.RunContainer(tty, cmdArray, resconfig, volume, containerName,envs)
+		envs := ctx.StringSlice("e")
+
+		//连接的网络
+		network:=ctx.String("net")
+		//获取端口映射
+		portMapping :=ctx.StringSlice("p")
+		container.RunContainer(tty, cmdArray, resconfig, volume, containerName, envs,network,portMapping)
 		return nil
 	},
 }
