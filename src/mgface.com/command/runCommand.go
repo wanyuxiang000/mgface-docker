@@ -84,6 +84,8 @@ var RunCommand = cli.Command{
 			MemoryLimit: ctx.String("m"),
 		}
 		logrus.Infof("入参tty:%t,命令:%s", tty, cmdArray)
+
+		logrus.Infof("0000.........")
 		//获得volume配置
 		volume := ctx.String("v")
 
@@ -94,6 +96,7 @@ var RunCommand = cli.Command{
 		network := ctx.String("net")
 		//获取端口映射
 		portMapping := ctx.StringSlice("p")
+		logrus.Infof("78.........")
 		container.RunContainer(tty, cmdArray, resconfig, volume, containerName, envs, network, portMapping)
 		return nil
 	},
