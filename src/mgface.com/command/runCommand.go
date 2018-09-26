@@ -94,6 +94,7 @@ var RunCommand = cli.Command{
 		logrus.Infof("3.........")
 		//连接的网络
 		network := ctx.String("net")
+		logrus.Infof("4.........")
 		//获取端口映射
 		portMapping := ctx.StringSlice("p")
 		logrus.Infof("78.........")
