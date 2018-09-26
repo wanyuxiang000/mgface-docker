@@ -73,6 +73,7 @@ func sendInitCommand(comArray []string, writePipe *os.File) {
 }
 
 func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume string, containerName string, envs []string, network string, portMapping []string) {
+	logrus.Infof("1.........")
 	//获取容器名称
 	containerName, id := containerInfo.GetContainerName(containerName)
 	//获取创建容器的父进程
@@ -80,6 +81,7 @@ func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume 
 	if err := parent.Start(); err != nil {
 		logrus.Fatal("发生错误:%s", err)
 	}
+	logrus.Infof("2.........")
 	//获取容器的PID
 	pid := parent.Process.Pid
 	//记录容器信息

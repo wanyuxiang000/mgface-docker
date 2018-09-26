@@ -91,10 +91,10 @@ var RunCommand = cli.Command{
 		envs := ctx.StringSlice("e")
 
 		//连接的网络
-		network:=ctx.String("net")
+		network := ctx.String("net")
 		//获取端口映射
-		portMapping :=ctx.StringSlice("p")
-		container.RunContainer(tty, cmdArray, resconfig, volume, containerName, envs,network,portMapping)
+		portMapping := ctx.StringSlice("p")
+		container.RunContainer(tty, cmdArray, resconfig, volume, containerName, envs, network, portMapping)
 		return nil
 	},
 }
