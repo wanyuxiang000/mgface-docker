@@ -47,6 +47,7 @@ func enterContainerNetns(link *netlink.Link, containerInfo *containerInfo.Contai
 	//返回之前Net Namespace的函数
 	//在容器的网络空间中,执行完容器配置之后调用此函数就可以将程序恢复到原生的 Net Namespace
 	return func() {
+		logrus.Infof("准备恢复当前进程的net namespace.")
 		//恢复到上面获取到的之前的Net Namespace
 		netns.Set(origns)
 		//关闭Namespace 文件
