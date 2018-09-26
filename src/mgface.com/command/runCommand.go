@@ -46,7 +46,7 @@ var flag = []cli.Flag{
 		Name:  "net",
 		Usage: "指定连接的网络",
 	},
-	cli.StringFlag{
+	cli.StringSliceFlag{
 		Name:  "p",
 		Usage: "端口映射",
 	},
@@ -85,19 +85,14 @@ var RunCommand = cli.Command{
 		}
 		logrus.Infof("入参tty:%t,命令:%s", tty, cmdArray)
 
-		logrus.Infof("1.........")
 		//获得volume配置
 		volume := ctx.String("v")
-		logrus.Infof("2.........")
 		//获得环境变量
 		envs := ctx.StringSlice("e")
-		logrus.Infof("3.........")
 		//连接的网络
 		network := ctx.String("net")
-		logrus.Infof("4.........")
 		//获取端口映射
 		portMapping := ctx.StringSlice("p")
-		logrus.Infof("78.........")
 		container.RunContainer(tty, cmdArray, resconfig, volume, containerName, envs, network, portMapping)
 		return nil
 	},
