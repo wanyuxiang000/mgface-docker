@@ -99,8 +99,9 @@ func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume 
 			Name:        containerName,
 			PortMapping: portMapping,
 		}
-
+		logrus.Info("**************开始配置网络**************")
 		containerNet.Connect(network, containerInfo)
+		logrus.Info("**************结束[end]配置网络**************")
 	}
 
 	//向容器进程进行通信

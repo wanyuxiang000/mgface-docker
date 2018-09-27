@@ -64,6 +64,7 @@ func (driver *BridgeNetworkDriver) Connect(network *Network, endpoint *Endpoint)
 	}
 	//调用 netlink 的 LinkSetUp 方法，设置 Veth 启动
 	//相当于 ip link set xxx up 命令
+	log.Info("启动Veth接口.")
 	if err = netlink.LinkSetUp(&endpoint.Device); err != nil {
 		return fmt.Errorf("Error Add Endpoint Device: %v", err)
 	}
