@@ -25,6 +25,10 @@
 #   unused-packages = true
 
 
+[[constraint]]
+   name = "github.com/vishvananda/netlink"
+   branch = "vxlanport"
+
 [prune]
   go-tests = true
   unused-packages = true

@@ -18,15 +18,16 @@
   version = "v1.20.0"
 
 [[projects]]
-  branch = "ci-fixes"
-  digest = "1:0cb5d2d4f28f5779fd1198ad087a972b6c2dadbee677378894aee14f35204ac1"
+  branch = "vxlanport"
+  digest = "1:935635202960570e5a6a4c6afce86dfe728f46132c05394d6f2742cee8f74bb7"
   name = "github.com/vishvananda/netlink"
   packages = [
     ".",
     "nl",
   ]
   pruneopts = "UT"
-  revision = "a98f31ffc7e9a462941bb5dfbb0f8a34e83eb1bf"
+  revision = "5b7621d2b386f915a3bbe7c9a1ba6ba22ec3e60d"
+  source = "github.com/vishvananda/netlink"
 
 [[projects]]
   branch = "master"

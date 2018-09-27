@@ -70,13 +70,13 @@ func RecordContainerInfo(containerPID int, commandArray []string, containerName 
 		Volume:      volume,
 	}
 
-	jsonBytes, _ := json.MarshalIndent(containerInfo, "", "   ") //美化输出缩进格式
-	jsonstr := string(jsonBytes)
 	dirUrl := fmt.Sprintf(constVar.DefaultInfoLocation, containerName)
 	os.MkdirAll(dirUrl, 0622)
 	fileName := dirUrl + "/" + constVar.ConfigName
 	file, _ := os.Create(fileName)
 	defer file.Close()
-	file.WriteString(jsonstr)
+	jsonBytes, _ := json.MarshalIndent(containerInfo, "", "   ") //美化输出缩进格式
+	content := append(jsonBytes,[]byte("\n")...)
+	file.Write(content)
 	return containerName, nil
 }

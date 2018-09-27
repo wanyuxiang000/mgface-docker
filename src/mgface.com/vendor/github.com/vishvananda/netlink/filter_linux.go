@@ -3,94 +3,16 @@ package netlink
 import (
 	"bytes"
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"syscall"
-	"unsafe"
 
 	"github.com/vishvananda/netlink/nl"
 )
 
-// Fw filter filters on firewall marks
-// NOTE: this is in filter_linux because it refers to nl.TcPolice which
-//       is defined in nl/tc_linux.go
-type Fw struct {
-	FilterAttrs
-	ClassId uint32
-	// TODO remove nl type from interface
-	Police nl.TcPolice
-	InDev  string
-	// TODO Action
-	Mask   uint32
-	AvRate uint32
-	Rtab   [256]uint32
-	Ptab   [256]uint32
-}
-
-func NewFw(attrs FilterAttrs, fattrs FilterFwAttrs) (*Fw, error) {
-	var rtab [256]uint32
-	var ptab [256]uint32
-	rcellLog := -1
-	pcellLog := -1
-	avrate := fattrs.AvRate / 8
-	police := nl.TcPolice{}
-	police.Rate.Rate = fattrs.Rate / 8
-	police.PeakRate.Rate = fattrs.PeakRate / 8
-	buffer := fattrs.Buffer
-	linklayer := nl.LINKLAYER_ETHERNET
-
-	if fattrs.LinkLayer != nl.LINKLAYER_UNSPEC {
-		linklayer = fattrs.LinkLayer
-	}
-
-	police.Action = int32(fattrs.Action)
-	if police.Rate.Rate != 0 {
-		police.Rate.Mpu = fattrs.Mpu
-		police.Rate.Overhead = fattrs.Overhead
-		if CalcRtable(&police.Rate, rtab, rcellLog, fattrs.Mtu, linklayer) < 0 {
-			return nil, errors.New("TBF: failed to calculate rate table")
-		}
-		police.Burst = uint32(Xmittime(uint64(police.Rate.Rate), uint32(buffer)))
-	}
-	police.Mtu = fattrs.Mtu
-	if police.PeakRate.Rate != 0 {
-		police.PeakRate.Mpu = fattrs.Mpu
-		police.PeakRate.Overhead = fattrs.Overhead
-		if CalcRtable(&police.PeakRate, ptab, pcellLog, fattrs.Mtu, linklayer) < 0 {
-			return nil, errors.New("POLICE: failed to calculate peak rate table")
-		}
-	}
-
-	return &Fw{
-		FilterAttrs: attrs,
-		ClassId:     fattrs.ClassId,
-		InDev:       fattrs.InDev,
-		Mask:        fattrs.Mask,
-		Police:      police,
-		AvRate:      avrate,
-		Rtab:        rtab,
-		Ptab:        ptab,
-	}, nil
-}
-
-func (filter *Fw) Attrs() *FilterAttrs {
-	return &filter.FilterAttrs
-}
-
-func (filter *Fw) Type() string {
-	return "fw"
-}
-
 // FilterDel will delete a filter from the system.
 // Equivalent to: `tc filter del $filter`
 func FilterDel(filter Filter) error {
-	return pkgHandle.FilterDel(filter)
-}
-
-// FilterDel will delete a filter from the system.
-// Equivalent to: `tc filter del $filter`
-func (h *Handle) FilterDel(filter Filter) error {
-	req := h.newNetlinkRequest(syscall.RTM_DELTFILTER, syscall.NLM_F_ACK)
+	req := nl.NewNetlinkRequest(syscall.RTM_DELTFILTER, syscall.NLM_F_ACK)
 	base := filter.Attrs()
 	msg := &nl.TcMsg{
 		Family:  nl.FAMILY_ALL,
@@ -108,14 +30,8 @@ func (h *Handle) FilterDel(filter Filter) error {
 // FilterAdd will add a filter to the system.
 // Equivalent to: `tc filter add $filter`
 func FilterAdd(filter Filter) error {
-	return pkgHandle.FilterAdd(filter)
-}
-
-// FilterAdd will add a filter to the system.
-// Equivalent to: `tc filter add $filter`
-func (h *Handle) FilterAdd(filter Filter) error {
 	native = nl.NativeEndian()
-	req := h.newNetlinkRequest(syscall.RTM_NEWTFILTER, syscall.NLM_F_CREATE|syscall.NLM_F_EXCL|syscall.NLM_F_ACK)
+	req := nl.NewNetlinkRequest(syscall.RTM_NEWTFILTER, syscall.NLM_F_CREATE|syscall.NLM_F_EXCL|syscall.NLM_F_ACK)
 	base := filter.Attrs()
 	msg := &nl.TcMsg{
 		Family:  nl.FAMILY_ALL,
@@ -129,34 +45,12 @@ func (h *Handle) FilterAdd(filter Filter) error {
 
 	options := nl.NewRtAttr(nl.TCA_OPTIONS, nil)
 	if u32, ok := filter.(*U32); ok {
-		// Convert TcU32Sel into nl.TcU32Sel as it is without copy.
-		sel := (*nl.TcU32Sel)(unsafe.Pointer(u32.Sel))
-		if sel == nil {
-			// match all
-			sel = &nl.TcU32Sel{
-				Nkeys: 1,
-				Flags: nl.TC_U32_TERMINAL,
-			}
-			sel.Keys = append(sel.Keys, nl.TcU32Key{})
+		// match all
+		sel := nl.TcU32Sel{
+			Nkeys: 1,
+			Flags: nl.TC_U32_TERMINAL,
 		}
-
-		if native != networkOrder {
-			// Copy TcU32Sel.
-			cSel := *sel
-			keys := make([]nl.TcU32Key, cap(sel.Keys))
-			copy(keys, sel.Keys)
-			cSel.Keys = keys
-			sel = &cSel
-
-			// Handle the endianness of attributes
-			sel.Offmask = native.Uint16(htons(sel.Offmask))
-			sel.Hmask = native.Uint32(htonl(sel.Hmask))
-			for i, key := range sel.Keys {
-				sel.Keys[i].Mask = native.Uint32(htonl(key.Mask))
-				sel.Keys[i].Val = native.Uint32(htonl(key.Val))
-			}
-		}
-		sel.Nkeys = uint8(len(sel.Keys))
+		sel.Keys = append(sel.Keys, nl.TcU32Key{})
 		nl.NewRtAttrChild(options, nl.TCA_U32_SEL, sel.Serialize())
 		if u32.ClassId != 0 {
 			nl.NewRtAttrChild(options, nl.TCA_U32_CLASSID, nl.Uint32Attr(u32.ClassId))
@@ -166,7 +60,7 @@ func (h *Handle) FilterAdd(filter Filter) error {
 		if u32.RedirIndex != 0 {
 			u32.Actions = append([]Action{NewMirredAction(u32.RedirIndex)}, u32.Actions...)
 		}
-		if err := EncodeActions(actionsAttr, u32.Actions); err != nil {
+		if err := encodeActions(actionsAttr, u32.Actions); err != nil {
 			return err
 		}
 	} else if fw, ok := filter.(*Fw); ok {
@@ -197,7 +91,7 @@ func (h *Handle) FilterAdd(filter Filter) error {
 			nl.NewRtAttrChild(options, nl.TCA_FW_CLASSID, b)
 		}
 	} else if bpf, ok := filter.(*BpfFilter); ok {
-		var bpfFlags uint32
+		var bpf_flags uint32
 		if bpf.ClassId != 0 {
 			nl.NewRtAttrChild(options, nl.TCA_BPF_CLASSID, nl.Uint32Attr(bpf.ClassId))
 		}
@@ -208,9 +102,9 @@ func (h *Handle) FilterAdd(filter Filter) error {
 			nl.NewRtAttrChild(options, nl.TCA_BPF_NAME, nl.ZeroTerminated(bpf.Name))
 		}
 		if bpf.DirectAction {
-			bpfFlags |= nl.TCA_BPF_FLAG_ACT_DIRECT
+			bpf_flags |= nl.TCA_BPF_FLAG_ACT_DIRECT
 		}
-		nl.NewRtAttrChild(options, nl.TCA_BPF_FLAGS, nl.Uint32Attr(bpfFlags))
+		nl.NewRtAttrChild(options, nl.TCA_BPF_FLAGS, nl.Uint32Attr(bpf_flags))
 	}
 
 	req.AddData(options)
@@ -220,23 +114,16 @@ func (h *Handle) FilterAdd(filter Filter) error {
 
 // FilterList gets a list of filters in the system.
 // Equivalent to: `tc filter show`.
-// Generally returns nothing if link and parent are not specified.
+// Generally retunrs nothing if link and parent are not specified.
 func FilterList(link Link, parent uint32) ([]Filter, error) {
-	return pkgHandle.FilterList(link, parent)
-}
-
-// FilterList gets a list of filters in the system.
-// Equivalent to: `tc filter show`.
-// Generally returns nothing if link and parent are not specified.
-func (h *Handle) FilterList(link Link, parent uint32) ([]Filter, error) {
-	req := h.newNetlinkRequest(syscall.RTM_GETTFILTER, syscall.NLM_F_DUMP)
+	req := nl.NewNetlinkRequest(syscall.RTM_GETTFILTER, syscall.NLM_F_DUMP)
 	msg := &nl.TcMsg{
 		Family: nl.FAMILY_ALL,
 		Parent: parent,
 	}
 	if link != nil {
 		base := link.Attrs()
-		h.ensureIndex(base)
+		ensureIndex(base)
 		msg.Ifindex = int32(base.Index)
 	}
 	req.AddData(msg)
@@ -301,8 +188,6 @@ func (h *Handle) FilterList(link Link, parent uint32) ([]Filter, error) {
 					if err != nil {
 						return nil, err
 					}
-				default:
-					detailed = true
 				}
 			}
 		}
@@ -316,23 +201,7 @@ func (h *Handle) FilterList(link Link, parent uint32) ([]Filter, error) {
 	return res, nil
 }
 
-func toTcGen(attrs *ActionAttrs, tcgen *nl.TcGen) {
-	tcgen.Index = uint32(attrs.Index)
-	tcgen.Capab = uint32(attrs.Capab)
-	tcgen.Action = int32(attrs.Action)
-	tcgen.Refcnt = int32(attrs.Refcnt)
-	tcgen.Bindcnt = int32(attrs.Bindcnt)
-}
-
-func toAttrs(tcgen *nl.TcGen, attrs *ActionAttrs) {
-	attrs.Index = int(tcgen.Index)
-	attrs.Capab = int(tcgen.Capab)
-	attrs.Action = TcAct(tcgen.Action)
-	attrs.Refcnt = int(tcgen.Refcnt)
-	attrs.Bindcnt = int(tcgen.Bindcnt)
-}
-
-func EncodeActions(attr *nl.RtAttr, actions []Action) error {
+func encodeActions(attr *nl.RtAttr, actions []Action) error {
 	tabIndex := int(nl.TCA_ACT_TAB)
 
 	for _, action := range actions {
@@ -344,30 +213,15 @@ func EncodeActions(attr *nl.RtAttr, actions []Action) error {
 			tabIndex++
 			nl.NewRtAttrChild(table, nl.TCA_ACT_KIND, nl.ZeroTerminated("mirred"))
 			aopts := nl.NewRtAttrChild(table, nl.TCA_ACT_OPTIONS, nil)
-			mirred := nl.TcMirred{
-				Eaction: int32(action.MirredAction),
-				Ifindex: uint32(action.Ifindex),
-			}
-			toTcGen(action.Attrs(), &mirred.TcGen)
-			nl.NewRtAttrChild(aopts, nl.TCA_MIRRED_PARMS, mirred.Serialize())
+			nl.NewRtAttrChild(aopts, nl.TCA_MIRRED_PARMS, action.Serialize())
 		case *BpfAction:
 			table := nl.NewRtAttrChild(attr, tabIndex, nil)
 			tabIndex++
 			nl.NewRtAttrChild(table, nl.TCA_ACT_KIND, nl.ZeroTerminated("bpf"))
 			aopts := nl.NewRtAttrChild(table, nl.TCA_ACT_OPTIONS, nil)
-			gen := nl.TcGen{}
-			toTcGen(action.Attrs(), &gen)
-			nl.NewRtAttrChild(aopts, nl.TCA_ACT_BPF_PARMS, gen.Serialize())
+			nl.NewRtAttrChild(aopts, nl.TCA_ACT_BPF_PARMS, action.Serialize())
 			nl.NewRtAttrChild(aopts, nl.TCA_ACT_BPF_FD, nl.Uint32Attr(uint32(action.Fd)))
 			nl.NewRtAttrChild(aopts, nl.TCA_ACT_BPF_NAME, nl.ZeroTerminated(action.Name))
-		case *GenericAction:
-			table := nl.NewRtAttrChild(attr, tabIndex, nil)
-			tabIndex++
-			nl.NewRtAttrChild(table, nl.TCA_ACT_KIND, nl.ZeroTerminated("gact"))
-			aopts := nl.NewRtAttrChild(table, nl.TCA_ACT_OPTIONS, nil)
-			gen := nl.TcGen{}
-			toTcGen(action.Attrs(), &gen)
-			nl.NewRtAttrChild(aopts, nl.TCA_GACT_PARMS, gen.Serialize())
 		}
 	}
 	return nil
@@ -393,8 +247,6 @@ func parseActions(tables []syscall.NetlinkRouteAttr) ([]Action, error) {
 					action = &MirredAction{}
 				case "bpf":
 					action = &BpfAction{}
-				case "gact":
-					action = &GenericAction{}
 				default:
 					break nextattr
 				}
@@ -408,27 +260,16 @@ func parseActions(tables []syscall.NetlinkRouteAttr) ([]Action, error) {
 					case "mirred":
 						switch adatum.Attr.Type {
 						case nl.TCA_MIRRED_PARMS:
-							mirred := *nl.DeserializeTcMirred(adatum.Value)
-							toAttrs(&mirred.TcGen, action.Attrs())
-							action.(*MirredAction).ActionAttrs = ActionAttrs{}
-							action.(*MirredAction).Ifindex = int(mirred.Ifindex)
-							action.(*MirredAction).MirredAction = MirredAct(mirred.Eaction)
+							action.(*MirredAction).TcMirred = *nl.DeserializeTcMirred(adatum.Value)
 						}
 					case "bpf":
 						switch adatum.Attr.Type {
 						case nl.TCA_ACT_BPF_PARMS:
-							gen := *nl.DeserializeTcGen(adatum.Value)
-							toAttrs(&gen, action.Attrs())
+							action.(*BpfAction).TcActBpf = *nl.DeserializeTcActBpf(adatum.Value)
 						case nl.TCA_ACT_BPF_FD:
 							action.(*BpfAction).Fd = int(native.Uint32(adatum.Value[0:4]))
 						case nl.TCA_ACT_BPF_NAME:
 							action.(*BpfAction).Name = string(adatum.Value[:len(adatum.Value)-1])
-						}
-					case "gact":
-						switch adatum.Attr.Type {
-						case nl.TCA_GACT_PARMS:
-							gen := *nl.DeserializeTcGen(adatum.Value)
-							toAttrs(&gen, action.Attrs())
 						}
 					}
 				}
@@ -448,15 +289,9 @@ func parseU32Data(filter Filter, data []syscall.NetlinkRouteAttr) (bool, error) 
 		case nl.TCA_U32_SEL:
 			detailed = true
 			sel := nl.DeserializeTcU32Sel(datum.Value)
-			u32.Sel = (*TcU32Sel)(unsafe.Pointer(sel))
-			if native != networkOrder {
-				// Handle the endianness of attributes
-				u32.Sel.Offmask = native.Uint16(htons(sel.Offmask))
-				u32.Sel.Hmask = native.Uint32(htonl(sel.Hmask))
-				for i, key := range u32.Sel.Keys {
-					u32.Sel.Keys[i].Mask = native.Uint32(htonl(key.Mask))
-					u32.Sel.Keys[i].Val = native.Uint32(htonl(key.Val))
-				}
+			// only parse if we have a very basic redirect
+			if sel.Flags&nl.TC_U32_TERMINAL == 0 || sel.Nkeys != 1 {
+				return detailed, nil
 			}
 		case nl.TCA_U32_ACT:
 			tables, err := nl.ParseRouteAttr(datum.Value)
@@ -472,8 +307,6 @@ func parseU32Data(filter Filter, data []syscall.NetlinkRouteAttr) (bool, error) 
 					u32.RedirIndex = int(action.Ifindex)
 				}
 			}
-		case nl.TCA_U32_CLASSID:
-			u32.ClassId = native.Uint32(datum.Value)
 		}
 	}
 	return detailed, nil
@@ -552,27 +385,27 @@ func AdjustSize(sz uint, mpu uint, linklayer int) uint {
 	}
 }
 
-func CalcRtable(rate *nl.TcRateSpec, rtab [256]uint32, cellLog int, mtu uint32, linklayer int) int {
+func CalcRtable(rate *nl.TcRateSpec, rtab [256]uint32, cell_log int, mtu uint32, linklayer int) int {
 	bps := rate.Rate
 	mpu := rate.Mpu
 	var sz uint
 	if mtu == 0 {
 		mtu = 2047
 	}
-	if cellLog < 0 {
-		cellLog = 0
-		for (mtu >> uint(cellLog)) > 255 {
-			cellLog++
+	if cell_log < 0 {
+		cell_log = 0
+		for (mtu >> uint(cell_log)) > 255 {
+			cell_log++
 		}
 	}
 	for i := 0; i < 256; i++ {
-		sz = AdjustSize(uint((i+1)<<uint32(cellLog)), uint(mpu), linklayer)
+		sz = AdjustSize(uint((i+1)<<uint32(cell_log)), uint(mpu), linklayer)
 		rtab[i] = uint32(Xmittime(uint64(bps), uint32(sz)))
 	}
 	rate.CellAlign = -1
-	rate.CellLog = uint8(cellLog)
+	rate.CellLog = uint8(cell_log)
 	rate.Linklayer = uint8(linklayer & nl.TC_LINKLAYER_MASK)
-	return cellLog
+	return cell_log
 }
 
 func DeserializeRtab(b []byte) [256]uint32 {

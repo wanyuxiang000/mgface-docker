@@ -7,6 +7,7 @@ import (
 	"net"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 type BridgeNetworkDriver struct {
@@ -124,11 +125,35 @@ func createBridgeInterface(bridgeName string) error {
 
 //设置一个网络接口的IP地址
 func setInterfaceIP(name string, ipRange string) error {
-	iface, _ := netlink.LinkByName(name)
-	ipNet, _ := netlink.ParseIPNet(ipRange)
-	addr := &netlink.Addr{IPNet: ipNet}
-	//调用netlink的AddrAdd方法,配置Linux Bridge的地址和路由表。
+
+	retries := 2
+	var iface netlink.Link
+	var err error
+	for i := 0; i < retries; i++ {
+		iface, err = netlink.LinkByName(name)
+		if err == nil {
+			break
+		}
+		log.Debugf("error retrieving new bridge netlink link [ %s ]... retrying", name)
+		time.Sleep(2 * time.Second)
+	}
+	if err != nil {
+		return fmt.Errorf("Abandoning retrieving the new bridge link from netlink, Run [ ip link ] to troubleshoot the error: %v", err)
+	}
+	ipNet, err := netlink.ParseIPNet(ipRange)
+	if err != nil {
+		return err
+	}
+	addr := &netlink.Addr{ipNet, "", 0, 0}
 	return netlink.AddrAdd(iface, addr)
+
+
+
+	//iface, _ := netlink.LinkByName(name)
+	//ipNet, _ := netlink.ParseIPNet(ipRange)
+	//addr := &netlink.Addr{IPNet: ipNet}
+	////调用netlink的AddrAdd方法,配置Linux Bridge的地址和路由表。
+	//return netlink.AddrAdd(iface, addr)
 }
 
 // deleteBridge deletes the bridge

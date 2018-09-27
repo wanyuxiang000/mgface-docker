@@ -121,9 +121,15 @@ func Connect(networkName string, containerInfo *containerInfo.ContainerInfo) err
 		PortMapping: containerInfo.PortMapping,
 	}
 	//调用网络驱动挂载和配置网络端点
-	drivers[network.Driver].Connect(network, endpoint)
+	if err:=drivers[network.Driver].Connect(network, endpoint);err!=nil{
+		logrus.Infof("调用网络驱动挂载和配置网络端点 发生错误:%+s",err)
+		return err
+	}
 	//到容器的namespace配置容器网络设备的IP地址
-	configEndpointIpAddressAndRoute(endpoint, containerInfo)
+	if err :=configEndpointIpAddressAndRoute(endpoint, containerInfo);err!=nil{
+		logrus.Infof("到容器的namespace配置容器网络设备的IP地址 发生错误:%+s",err)
+		return err
+	}
 	//配置端口映射信息
 	return configPortMapping(endpoint)
 }
