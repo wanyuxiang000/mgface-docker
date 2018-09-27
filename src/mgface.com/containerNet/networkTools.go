@@ -108,29 +108,29 @@ func Connect(networkName string, containerInfo *containerInfo.ContainerInfo) err
 	if !ok {
 		return fmt.Errorf("没有找到匹配的Network: %s", networkName)
 	}
-	//为容器分配IP地址
+	logrus.Info("为容器分配IP地址.")
 	ip, err := ipAddressManage.Allocate(network.IpNet)
 	if err != nil {
 		return err
 	}
-	//创建网络端点
+	logrus.Info("创建网络端点.")
 	endpoint := &Endpoint{
 		ID:          fmt.Sprintf("%s-%s", containerInfo.Id, networkName),
 		IPAddress:   ip,
 		Network:     network,
 		PortMapping: containerInfo.PortMapping,
 	}
-	//调用网络驱动挂载和配置网络端点
+	logrus.Info("调用网络驱动挂载和配置网络端点.")
 	if err:=drivers[network.Driver].Connect(network, endpoint);err!=nil{
 		logrus.Infof("调用网络驱动挂载和配置网络端点 发生错误:%+s",err)
 		return err
 	}
-	//到容器的namespace配置容器网络设备的IP地址
+	logrus.Info("到容器的namespace配置容器网络设备的IP地址.")
 	if err :=configEndpointIpAddressAndRoute(endpoint, containerInfo);err!=nil{
 		logrus.Infof("到容器的namespace配置容器网络设备的IP地址 发生错误:%+s",err)
 		return err
 	}
-	//配置端口映射信息
+	logrus.Info("配置端口映射信息.")
 	return configPortMapping(endpoint)
 }
 

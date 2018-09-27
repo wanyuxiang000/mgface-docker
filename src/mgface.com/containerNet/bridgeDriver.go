@@ -44,7 +44,7 @@ func (driver *BridgeNetworkDriver) Connect(network *Network, endpoint *Endpoint)
 	if err != nil {
 		return err
 	}
-	//创建 Veth 接口的配置
+	log.Info("创建Veth接口的配置.")
 	la := netlink.NewLinkAttrs()
 	//由于 Linux 接口名的限制,名字取endpoint ID的前5位
 	la.Name = endpoint.ID[:5]
@@ -75,25 +75,25 @@ func (driver *BridgeNetworkDriver) Disconnect(network Network, endpoint *Endpoin
 }
 
 func (driver *BridgeNetworkDriver) initBridge(network *Network) error {
-	// 1. 创建 Bridge 虚拟设备
+	log.Info("1. 创建 Bridge 虚拟设备.")
 	bridgeName := network.Name
 	if err := createBridgeInterface(bridgeName); err != nil {
 		return fmt.Errorf("错误的添加bridge： %s, Error: %v", bridgeName, err)
 	}
 
-	//2.设置Bridge设备的地址和路由
+	log.Info("2.设置Bridge设备的地址和路由.")
 	ipNet := *network.IpNet
 	ipNet.IP = network.IpNet.IP
 
 	if err := setInterfaceIP(bridgeName, ipNet.String()); err != nil {
 		return fmt.Errorf("错误的分配一个地址: %s 在 bridge: %s 异常信息: %v", ipNet, bridgeName, err)
 	}
-	//3.启动Bridge设备
+	log.Info("3.启动Bridge设备.")
 	if err := setInterfaceUP(bridgeName); err != nil {
 		return fmt.Errorf("bridge %s 设备启动发生错误: %+v", bridgeName, err)
 	}
 
-	//4.设置iptabels的SNAT规则
+	log.Info("4.设置iptabels的SNAT规则.")
 	if err := setupIPTables(bridgeName, network.IpNet); err != nil {
 		return fmt.Errorf("%s 错误的设置iptables异常信息为: %v", bridgeName, err)
 	}
