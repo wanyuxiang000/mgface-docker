@@ -149,7 +149,7 @@ func setInterfaceIP(name string, ipRange string) error {
 
 	iface, _ := netlink.LinkByName(name)
 	ipNet, _ := netlink.ParseIPNet(ipRange)
-	addr := &netlink.Addr{IPNet: ipNet}
+	addr := &netlink.Addr{IPNet: ipNet,Broadcast:net.IPv4(172,18,1,255)}
 	//调用netlink的AddrAdd方法,配置Linux Bridge的地址和路由表。
 	return netlink.AddrAdd(iface, addr)
 }
