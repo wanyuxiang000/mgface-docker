@@ -121,13 +121,13 @@ func Connect(networkName string, containerInfo *containerInfo.ContainerInfo) err
 		PortMapping: containerInfo.PortMapping,
 	}
 	logrus.Info("调用网络驱动挂载和配置网络端点.")
-	if err:=drivers[network.Driver].Connect(network, endpoint);err!=nil{
-		logrus.Infof("调用网络驱动挂载和配置网络端点 发生错误:%+s",err)
+	if err := drivers[network.Driver].Connect(network, endpoint); err != nil {
+		logrus.Infof("调用网络驱动挂载和配置网络端点 发生错误:%+s", err)
 		return err
 	}
 	logrus.Info("到容器的namespace配置容器网络设备的IP地址.")
-	if err :=configEndpointIpAddressAndRoute(endpoint, containerInfo);err!=nil{
-		logrus.Infof("到容器的namespace配置容器网络设备的IP地址 发生错误:%+s",err)
+	if err := configEndpointIpAddressAndRoute(endpoint, containerInfo); err != nil {
+		logrus.Infof("到容器的namespace配置容器网络设备的IP地址 发生错误:%+s", err)
 		return err
 	}
 	logrus.Info("配置端口映射信息.")
@@ -144,11 +144,13 @@ func configPortMapping(endpoint *Endpoint) error {
 			logrus.Errorf("映射端口格式错误: %v", pm)
 			continue
 		}
-		//由于 iptables没有Go语言版本的实现,所以采用exec.Command 的方式直接调用命令配置
-		//在iptables的PREROUTING中添加DNAT规则,将宿主机的端口请求转发到容器的地址和端口上
+		logrus.Info("在iptables的PREROUTING中添加DNAT规则,将宿主机的端口请求转发到容器的地址和端口上.")
+		hostPort:=portMapping[0]
+		containerIp:=endpoint.IPAddress.String()
+		containerPort:= portMapping[1]
 		iptablesCmd := fmt.Sprintf("-t nat -A PREROUTING -p tcp -m tcp --dport %s -j DNAT --to-destination %s:%s",
-			portMapping[0], endpoint.IPAddress.String(), portMapping[1])
-		logrus.Infof("端口映射命令:%s",iptablesCmd)
+			hostPort, containerIp, containerPort)
+		logrus.Infof("端口映射命令:%s", iptablesCmd)
 		//执行 iptables 命令 ， 添加端口映射转发规则
 		cmd := exec.Command("iptables", strings.Split(iptablesCmd, " ")...)
 		output, err := cmd.Output()
@@ -156,9 +158,12 @@ func configPortMapping(endpoint *Endpoint) error {
 			logrus.Errorf("iptables Output, %v", output)
 			continue
 		}
+		logrus.Infof("在宿主机启动相应的端口做转发.宿主机端口:%s,容器的地址:%s:%s", hostPort,containerIp, containerPort)
+		hostServer(hostPort, fmt.Sprintf("%s:%s", containerIp, containerPort))
 	}
 	return nil
 }
+
 //func Disconnect(networkName string, cinfo *containerInfo.ContainerInfo) error {
 //	return nil
 //}
