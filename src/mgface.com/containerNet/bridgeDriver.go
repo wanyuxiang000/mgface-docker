@@ -124,7 +124,7 @@ func createBridgeInterface(bridgeName string) error {
 	}
 	fmt.Println(err.Error())
 	fmt.Println(!strings.Contains(err.Error(), "no such network interface"))
-	if err != nil || !strings.Contains(err.Error(), "no such network interface") {
+	if err != nil && !strings.Contains(err.Error(), "no such network interface") {
 		log.Errorf("创建网桥设备出错:%+v",err)
 		return err
 	}
