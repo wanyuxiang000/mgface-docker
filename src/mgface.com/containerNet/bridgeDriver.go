@@ -4,7 +4,9 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/vishvananda/netlink"
+	"mgface.com/constVar"
 	"net"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -99,6 +101,11 @@ func (driver *BridgeNetworkDriver) initBridge(network *Network) error {
 		return fmt.Errorf("%s 错误的设置iptables异常信息为: %v", bridgeName, err)
 	}
 
+	log.Info("5.开启linux的数据转发功能.")
+	ipv4File, _ := os.OpenFile(constVar.IP4Forward, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0644)
+	defer ipv4File.Close()
+	ipv4File.WriteString("1")
+
 	return nil
 }
 
@@ -126,30 +133,8 @@ func createBridgeInterface(bridgeName string) error {
 //设置一个网络接口的IP地址
 func setInterfaceIP(name string, ipRange string) error {
 
-	//retries := 2
-	//var iface netlink.Link
-	//var err error
-	//for i := 0; i < retries; i++ {
-	//	iface, err = netlink.LinkByName(name)
-	//	if err == nil {
-	//		break
-	//	}
-	//	log.Debugf("error retrieving new bridge netlink link [ %s ]... retrying", name)
-	//	time.Sleep(2 * time.Second)
-	//}
-	//if err != nil {
-	//	return fmt.Errorf("Abandoning retrieving the new bridge link from netlink, Run [ ip link ] to troubleshoot the error: %v", err)
-	//}
-	//ipNet, err := netlink.ParseIPNet(ipRange)
-	//if err != nil {
-	//	return err
-	//}
-	//addr := &netlink.Addr{ipNet, "", 0, 0}
-	//return netlink.AddrAdd(iface, addr)
-
 	iface, _ := netlink.LinkByName(name)
 	ipNet, _ := netlink.ParseIPNet(ipRange)
-	//addr := &netlink.Addr{IPNet: ipNet,Broadcast:net.IPv4(172,18,1,255)}
 	addr := &netlink.Addr{IPNet: ipNet, Peer: ipNet, Label: "", Flags: 0, Scope: 0, Broadcast: nil}
 	//调用netlink的AddrAdd方法,配置Linux Bridge的地址和路由表。
 	return netlink.AddrAdd(iface, addr)

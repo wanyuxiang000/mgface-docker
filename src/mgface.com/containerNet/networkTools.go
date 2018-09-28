@@ -148,7 +148,7 @@ func configPortMapping(endpoint *Endpoint) error {
 		//在iptables的PREROUTING中添加DNAT规则,将宿主机的端口请求转发到容器的地址和端口上
 		iptablesCmd := fmt.Sprintf("-t nat -A PREROUTING -p tcp -m tcp --dport %s -j DNAT --to-destination %s:%s",
 			portMapping[0], endpoint.IPAddress.String(), portMapping[1])
-		logrus.Info("端口映射命令:%s",iptablesCmd)
+		logrus.Infof("端口映射命令:%s",iptablesCmd)
 		//执行 iptables 命令 ， 添加端口映射转发规则
 		cmd := exec.Command("iptables", strings.Split(iptablesCmd, " ")...)
 		output, err := cmd.Output()
