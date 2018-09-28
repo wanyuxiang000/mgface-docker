@@ -1,6 +1,7 @@
 package containerNet
 
 import (
+	"errors"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/vishvananda/netlink"
@@ -27,11 +28,12 @@ func (driver *BridgeNetworkDriver) Create(subnet string, name string) (*Network,
 		IpNet:  ipNet,
 		Driver: driver.Name(),
 	}
-	err := driver.initBridge(network)
-	if err != nil {
+
+	if err := driver.initBridge(network); err != nil {
 		log.Errorf("错误的初始化bridge: %v", err)
+		return network, err
 	}
-	return network, err
+	return network, nil
 }
 
 func (driver *BridgeNetworkDriver) Delete(network Network) error {
@@ -110,17 +112,25 @@ func (driver *BridgeNetworkDriver) initBridge(network *Network) error {
 }
 
 func createBridgeInterface(bridgeName string) error {
+
+	ipface, err := net.InterfaceByName("docker0")
+	fmt.Println("1---->", ipface, err)
 	//先检查是否己经存在了这个同名的 Bridge 设备
-	ipface, err := net.InterfaceByName(bridgeName)
-	fmt.Println("---->",ipface,err)
+	ipface, err = net.InterfaceByName(bridgeName)
+	fmt.Println("1---->", ipface, err)
 	//如果已经存在或者报错则返回创建错误
-	if err == nil || !strings.Contains(err.Error(), "no such network interface") {
+	if ipface != nil {
+		return errors.New("设备存在.创建失败.")
+	}
+
+	if err != nil || !strings.Contains(err.Error(), "no such network interface") {
+		log.Errorf("创建网桥设备出错:%+v",err)
 		return err
 	}
 
 
-	//todo 假如存在docker0网桥的话，直接提示和它存在冲突，需要先卸载docker
 
+	//todo 假如存在docker0网桥的话，直接提示和它存在冲突，需要先卸载docker
 
 	//初始化一个netlink的Link基础对象,Link的名字即Bridge虚拟设备的名字
 	link := netlink.NewLinkAttrs()
