@@ -111,11 +111,16 @@ func (driver *BridgeNetworkDriver) initBridge(network *Network) error {
 
 func createBridgeInterface(bridgeName string) error {
 	//先检查是否己经存在了这个同名的 Bridge 设备
-	_, err := net.InterfaceByName(bridgeName)
+	ipface, err := net.InterfaceByName(bridgeName)
+	fmt.Println("---->",ipface,err)
 	//如果已经存在或者报错则返回创建错误
 	if err == nil || !strings.Contains(err.Error(), "no such network interface") {
 		return err
 	}
+
+
+	//todo 假如存在docker0网桥的话，直接提示和它存在冲突，需要先卸载docker
+
 
 	//初始化一个netlink的Link基础对象,Link的名字即Bridge虚拟设备的名字
 	link := netlink.NewLinkAttrs()
