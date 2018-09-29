@@ -1,17 +1,17 @@
 package containerNet
 
+import "C"
 import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"io"
 	"net"
-	"runtime"
 )
 
-/*
-#include <unistd.h>
-*/
-import "C"
+///*
+//#include <unistd.h>
+//*/
+//import "C"
 
 
 //houstport是宿主机的端口,作为对外代理的端口
@@ -19,8 +19,8 @@ import "C"
 func hostServer(hostport string, containerIp string) {
 
 	// 守护进程
-	C.daemon(1, 1)
-	runtime.GOMAXPROCS(runtime.NumCPU())
+	//C.daemon(1, 1)
+	//runtime.GOMAXPROCS(runtime.NumCPU())
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", hostport))
 	if err != nil {
 		logrus.Infof("监听宿主机端口报错:%s,错误信息:%+v", hostport, err)
