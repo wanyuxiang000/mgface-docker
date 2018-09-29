@@ -104,5 +104,6 @@ var RunCommand = cli.Command{
 		return nil
 	},
 
-	//todo 还需要让用户指定使用哪个镜像文件
+	//todo 还需要让用户指定使用哪个镜像文件  已经做完
+	//todo 配置默认的网桥  run启动的时候默认使用
 }
