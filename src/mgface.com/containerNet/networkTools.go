@@ -106,6 +106,7 @@ func configEndpointIpAddressAndRoute(endpoint *Endpoint, containerInfo *containe
 func Connect(networkName string, containerInfo *containerInfo.ContainerInfo) error {
 	fmt.Println("--------------------1")
 	network, ok := networks[networkName]
+	fmt.Println("--------------------12",network,ok,networkName)
 	if !ok {
 		return fmt.Errorf("没有找到匹配的Network: %s", networkName)
 	}
