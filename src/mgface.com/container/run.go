@@ -1,13 +1,16 @@
 package container
 
 import (
+	"flag"
 	"fmt"
 	"github.com/Sirupsen/logrus"
+	"log"
 	"mgface.com/aufs"
 	"mgface.com/cgroup"
 	"mgface.com/constVar"
 	"mgface.com/containerInfo"
 	"mgface.com/containerNet"
+	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
@@ -15,6 +18,17 @@ import (
 	"syscall"
 	"time"
 )
+
+func init() {
+	godaemon:=true
+	if godaemon {
+		cmd := exec.Command(os.Args[0], flag.Args()[1:]...)
+		cmd.Start()
+		fmt.Printf("%s [PID] %d running...\n", os.Args[0], cmd.Process.Pid)
+		godaemon = false
+		os.Exit(0)
+	}
+}
 
 func newParentProcess(tty bool, volume string, containerName string, envs []string) (*exec.Cmd, *os.File) {
 	r, w, _ := os.Pipe()
@@ -118,5 +132,10 @@ func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume 
 		aufs.DeleteFileSystem(volume, containerName)
 	} else {
 		logrus.Infof("不启用tty,父进程直接运行完毕,子进程进行detach分离给操作系统的init托管.")
+		mux := http.NewServeMux()
+		mux.HandleFunc("/index", func(rw http.ResponseWriter, req *http.Request) {
+			rw.Write([]byte("hello, golang!\n"))
+		})
+		log.Fatalln(http.ListenAndServe(":7070", mux))
 	}
 }

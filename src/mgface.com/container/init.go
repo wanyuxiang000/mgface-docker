@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -38,15 +37,9 @@ func RunContainerInitProcess() error {
 	//它的作用是执行当前filename对应的程序。它会覆盖当前进程的镜像、数据和堆械等信息，包括 PID.这些都会被将要运行的进程覆盖掉。
 	//也就是说，调用这个方法，将用户指定的进程运行起来，把最初的 init 进程给替换掉，这样当进入到容器内部的时候，就会发现容器内的第一个程序就是我们指定的进程了
 	logrus.Infof("命令行:%s", cmdArray[0:])
-	chs:=make(chan bool,1)
-	go func() {
-		http.ListenAndServe(":4444", nil)
-	}()
 	if err := syscall.Exec(path, cmdArray[0:], os.Environ()); err != nil {
 		logrus.Errorf(err.Error())
 	}
-	fmt.Println("获取。。。。。。")
-	<-chs
 	return nil
 }
 
