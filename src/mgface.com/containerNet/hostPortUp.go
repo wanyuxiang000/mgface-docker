@@ -5,6 +5,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"io"
 	"net"
+	"runtime"
 )
 
 /*
@@ -16,12 +17,12 @@ import "C"
 //containerIp 容器的IP地址和端口
 func hostServer(hostport string, containerIp string,tty bool) {
 	//假如没开启tty终端的话，那么是后台启动
-	//if !tty{
-	//	logrus.Info("通过Cgo来实现监听tcp的daemon实现")
-	//	//设置守护进程
-	//	C.daemon(1, 1)
-	//	runtime.GOMAXPROCS(runtime.NumCPU())
-	//}
+	if !tty{
+		logrus.Info("通过Cgo来实现监听tcp的daemon实现")
+		//设置守护进程
+		C.daemon(1, 1)
+		runtime.GOMAXPROCS(runtime.NumCPU())
+	}
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", hostport))
 	if err != nil {
 		logrus.Infof("监听宿主机端口报错:%s,错误信息:%+v", hostport, err)
