@@ -11,9 +11,10 @@ import (
 	"strings"
 )
 
-func NewFileSystem(volume string, containerName string) {
+func NewFileSystem(volume string, containerName string, command []string) {
+	fmt.Println("解析的command:",command)
 	logrus.Infof("1)创建只读层...")
-	createReadOnlyLayer(containerName)
+	createReadOnlyLayer(containerName,command)
 	logrus.Infof("2)创建可写层...")
 	createWriteLayer(containerName)
 	logrus.Infof("3)创建挂载点...")
@@ -23,9 +24,9 @@ func NewFileSystem(volume string, containerName string) {
 }
 
 //创建只读层
-func createReadOnlyLayer(containerName string) {
-	busyboxUrl := fmt.Sprintf(constVar.FileSystemURL, containerName)
-	busyboxTarURL := constVar.FileSystemTarURL
+func createReadOnlyLayer(containerName string,command []string) {
+	busyboxUrl := fmt.Sprintf(constVar.FileSystemURL,command[0], containerName)
+	busyboxTarURL := fmt.Sprintf(constVar.FileSystemTarURL,command[0])
 	exist, _ := pathExit(busyboxUrl)
 	if exist == false {
 		if err := os.MkdirAll(busyboxUrl, 0777); err != nil {
@@ -39,7 +40,7 @@ func createReadOnlyLayer(containerName string) {
 		if len(fileInfos) < 2 {
 			os.RemoveAll(busyboxUrl)
 			logrus.Errorf("文件系统目录下面不存在文件,解压tar文件系统 %s 到 %s .", busyboxTarURL, busyboxUrl)
-			createReadOnlyLayer(containerName)
+			createReadOnlyLayer(containerName,command)
 		}
 	}
 }

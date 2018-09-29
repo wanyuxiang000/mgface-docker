@@ -61,13 +61,21 @@ var RunCommand = cli.Command{
 		if len(ctx.Args()) < 1 {
 			return fmt.Errorf("错误的容器参数")
 		}
+
+		tty := ctx.Bool("it")
+
 		var cmdArray []string
 		for _, arg := range ctx.Args() {
 			logrus.Infof("获取到参数:%s", arg)
 			cmdArray = append(cmdArray, arg)
 		}
 
-		tty := ctx.Bool("it")
+		logrus.Infof("入参tty:%t,命令:%s", tty, cmdArray)
+		//mgface -d --name admin -p 80:80 busybox top
+		//后面的busybox top 最少需要2个
+		if len(cmdArray) < 2 {
+			return fmt.Errorf("错误的容器参数,需要指定引用的文件系统.")
+		}
 
 		detach := ctx.Bool("d")
 
@@ -83,7 +91,6 @@ var RunCommand = cli.Command{
 			CpuShare:    ctx.String("cpushare"),
 			MemoryLimit: ctx.String("m"),
 		}
-		logrus.Infof("入参tty:%t,命令:%s", tty, cmdArray)
 
 		//获得volume配置
 		volume := ctx.String("v")
@@ -96,4 +103,6 @@ var RunCommand = cli.Command{
 		container.RunContainer(tty, cmdArray, resconfig, volume, containerName, envs, network, portMapping)
 		return nil
 	},
+
+	//todo 还需要让用户指定使用哪个镜像文件
 }
