@@ -100,7 +100,10 @@ func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume 
 			PortMapping: portMapping,
 		}
 		logrus.Info("**************开始配置网络**************")
-		containerNet.Connect(network, containerInfo)
+		if err:=containerNet.Connect(network, containerInfo);err!=nil{
+			logrus.Fatal("配置网络发生错误:%s", err.Error())
+			os.Exit(-1)
+		}
 		logrus.Info("**************结束[end]配置网络**************")
 	}
 
@@ -117,7 +120,7 @@ func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume 
 		//删除挂载点数据
 		aufs.DeleteFileSystem(volume, containerName)
 	} else {
-		time.Sleep(5*time.Second)
-		logrus.Infof("不启用tty,父进程直接运行完毕,子进程进行detach分离给操作系统的init托管.")
+		logrus.Infof("不启用tty,父进程等待3秒运行完毕,子进程进行detach分离给操作系统的init托管.")
+		time.Sleep(3*time.Second)
 	}
 }

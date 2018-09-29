@@ -13,12 +13,11 @@ import (
 */
 import "C"
 
-
 //houstport是宿主机的端口,作为对外代理的端口
 //containerIp 容器的IP地址和端口
 func hostServer(hostport string, containerIp string) {
-
-	// 守护进程
+	logrus.Info("通过Cgo来实现监听tcp的daemon实现")
+	//设置守护进程
 	C.daemon(1, 1)
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", hostport))
