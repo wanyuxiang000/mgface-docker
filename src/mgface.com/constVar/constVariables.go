@@ -5,9 +5,9 @@ const (
 	MntURL = "/root/mnt/%s/" //创建挂载点
 
 	//提示:文件系统可以从docker里面下载，docker export -o xxx.tar 容器ID
-	//例如/root/busybox.tar
+	//例如/root/busybox（文件系统）.tar
 	FileSystemTarURL = "/root/%s.tar" //使用的文件系统的tar目录，解压到FileSystemURL指定的目录
-	//例如/root/busybox/admin
+	//例如/root/busybox(文件系统)/admin（容器）
 	FileSystemURL = "/root/%s/%s/" //使用的文件系统存放的路径
 	WriteLayer = "/root/writeLayer/%s/" //创建可写层
 	MountAufsDirs = "dirs=" + WriteLayer + ":" + FileSystemURL //挂载的Aufs文件系统

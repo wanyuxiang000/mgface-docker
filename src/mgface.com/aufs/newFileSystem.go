@@ -12,21 +12,21 @@ import (
 )
 
 func NewFileSystem(volume string, containerName string, command []string) {
-	fmt.Println("解析的command:",command)
+	fmt.Println("解析的command:", command)
 	logrus.Infof("1)创建只读层...")
-	createReadOnlyLayer(containerName,command)
+	createReadOnlyLayer(containerName, command)
 	logrus.Infof("2)创建可写层...")
 	createWriteLayer(containerName)
 	logrus.Infof("3)创建挂载点...")
-	createMountPoint(containerName)
+	createMountPoint(containerName, command)
 	logrus.Infof("4)挂载卷映射...")
 	volumeMapping(volume, containerName)
 }
 
 //创建只读层
-func createReadOnlyLayer(containerName string,command []string) {
-	busyboxUrl := fmt.Sprintf(constVar.FileSystemURL,command[0], containerName)
-	busyboxTarURL := fmt.Sprintf(constVar.FileSystemTarURL,command[0])
+func createReadOnlyLayer(containerName string, command []string) {
+	busyboxUrl := fmt.Sprintf(constVar.FileSystemURL, command[0], containerName)
+	busyboxTarURL := fmt.Sprintf(constVar.FileSystemTarURL, command[0])
 	exist, _ := pathExit(busyboxUrl)
 	if exist == false {
 		if err := os.MkdirAll(busyboxUrl, 0777); err != nil {
@@ -40,7 +40,7 @@ func createReadOnlyLayer(containerName string,command []string) {
 		if len(fileInfos) < 2 {
 			os.RemoveAll(busyboxUrl)
 			logrus.Errorf("文件系统目录下面不存在文件,解压tar文件系统 %s 到 %s .", busyboxTarURL, busyboxUrl)
-			createReadOnlyLayer(containerName,command)
+			createReadOnlyLayer(containerName, command)
 		}
 	}
 }
@@ -50,11 +50,11 @@ func createWriteLayer(containerName string) {
 	os.MkdirAll(writeURL, 0777)
 }
 
-func createMountPoint(containerName string) error {
+func createMountPoint(containerName string, command []string) error {
 	containerNameURL := fmt.Sprintf(constVar.MntURL, containerName)
 	logrus.Infof("开始创建挂载点目录%s.", containerNameURL)
 	os.MkdirAll(containerNameURL, 0777)
-	cmd := exec.Command("mount", "-t", "aufs", "-o", fmt.Sprintf(constVar.MountAufsDirs, containerName, containerName), "none", containerNameURL)
+	cmd := exec.Command("mount", "-t", "aufs", "-o", fmt.Sprintf(constVar.MountAufsDirs, containerName, command[0], containerName), "none", containerNameURL)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
