@@ -123,8 +123,6 @@ func createBridgeInterface(bridgeName string) error {
 	if ipface != nil {
 		return errors.New("设备存在.创建失败.")
 	}
-	fmt.Println(err.Error())
-	fmt.Println(!strings.Contains(err.Error(), "no such network interface"))
 	if err != nil && !strings.Contains(err.Error(), "no such network interface") {
 		log.Errorf("创建网桥设备出错:%+v",err)
 		return err
