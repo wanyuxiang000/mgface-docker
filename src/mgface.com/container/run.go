@@ -117,6 +117,7 @@ func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume 
 		//删除挂载点数据
 		aufs.DeleteFileSystem(volume, containerName)
 	} else {
+		time.Sleep(5*time.Second)
 		logrus.Infof("不启用tty,父进程直接运行完毕,子进程进行detach分离给操作系统的init托管.")
 	}
 }
