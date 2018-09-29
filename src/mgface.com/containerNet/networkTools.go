@@ -104,10 +104,12 @@ func configEndpointIpAddressAndRoute(endpoint *Endpoint, containerInfo *containe
 }
 
 func Connect(networkName string, containerInfo *containerInfo.ContainerInfo) error {
+	fmt.Println("--------------------1")
 	network, ok := networks[networkName]
 	if !ok {
 		return fmt.Errorf("没有找到匹配的Network: %s", networkName)
 	}
+	fmt.Println("--------------------2")
 	logrus.Info("为容器分配IP地址.")
 	ip, err := ipAddressManage.Allocate(network.IpNet)
 	if err != nil {
