@@ -103,7 +103,7 @@ func configEndpointIpAddressAndRoute(endpoint *Endpoint, containerInfo *containe
 	return nil
 }
 
-func Connect(networkName string, containerInfo *containerInfo.ContainerInfo) error {
+func Connect(networkName string, containerInfo *containerInfo.ContainerInfo,tty bool) error {
 	network, ok := networks[networkName]
 	if !ok {
 		return fmt.Errorf("没有找到匹配的Network: %s", networkName)
@@ -131,11 +131,11 @@ func Connect(networkName string, containerInfo *containerInfo.ContainerInfo) err
 		return err
 	}
 	logrus.Info("配置端口映射信息.")
-	return configPortMapping(endpoint)
+	return configPortMapping(endpoint,tty)
 }
 
 //配置端口映射
-func configPortMapping(endpoint *Endpoint) error {
+func configPortMapping(endpoint *Endpoint,tty bool) error {
 	//遍历容器端口映射列表
 	for _, pm := range endpoint.PortMapping {
 		//分成宿主机的端口和容器的端口
@@ -159,7 +159,7 @@ func configPortMapping(endpoint *Endpoint) error {
 			continue
 		}
 		logrus.Infof("在宿主机启动相应的端口做转发.宿主机端口:%s,容器的地址:%s:%s", hostPort,containerIp, containerPort)
-		go hostServer(hostPort, fmt.Sprintf("%s:%s", containerIp, containerPort))
+		go hostServer(hostPort, fmt.Sprintf("%s:%s", containerIp, containerPort),tty)
 	}
 	return nil
 }

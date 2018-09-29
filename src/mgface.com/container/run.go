@@ -100,7 +100,7 @@ func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume 
 			PortMapping: portMapping,
 		}
 		logrus.Info("**************开始配置网络**************")
-		if err:=containerNet.Connect(network, containerInfo);err!=nil{
+		if err:=containerNet.Connect(network, containerInfo,tty);err!=nil{
 			logrus.Fatal("配置网络发生错误:%s", err.Error())
 			os.Exit(-1)
 		}
