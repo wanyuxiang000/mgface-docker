@@ -10,11 +10,17 @@ import (
 	"mgface.com/containerNet"
 	"os"
 	"os/exec"
+	"runtime"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
 )
+
+/*
+#include <unistd.h>
+*/
+import "C"
 
 func newParentProcess(tty bool, volume string, containerName string, envs []string) (*exec.Cmd, *os.File) {
 	r, w, _ := os.Pipe()
@@ -120,8 +126,12 @@ func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume 
 		//删除挂载点数据
 		aufs.DeleteFileSystem(volume, containerName)
 	} else {
-		logrus.Info("等待3秒为了初始化宿主机监听端口信息等...")
-		time.Sleep(3*time.Second)
-		logrus.Infof("不启用tty,父进程直接运行完毕,子进程进行detach分离给操作系统的init托管.")
+		//logrus.Info("等待3秒为了初始化宿主机监听端口信息等...")
+		//time.Sleep(3*time.Second)
+		//logrus.Infof("不启用tty,父进程直接运行完毕,子进程进行detach分离给操作系统的init托管.")
+			logrus.Info("通过Cgo来实现daemon实现")
+			//设置守护进程
+			C.daemon(1, 1)
+			runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 }
