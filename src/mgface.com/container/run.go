@@ -126,7 +126,7 @@ func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume 
 		dirURL := fmt.Sprintf(constVar.DefaultInfoLocation, containerName)
 		stdLogFile := dirURL + constVar.ContainerLog
 		content,_:=ioutil.ReadFile(stdLogFile)
-		fmt.Println("读出容器启动的初始日志:",content)
+		fmt.Println("读出容器启动的初始日志:",string(content))
 
 		logrus.Infof("不启用tty,父进程直接运行完毕,子进程进行detach分离给操作系统的init托管.")
 	}
