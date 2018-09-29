@@ -159,7 +159,7 @@ func configPortMapping(endpoint *Endpoint) error {
 			continue
 		}
 		logrus.Infof("在宿主机启动相应的端口做转发.宿主机端口:%s,容器的地址:%s:%s", hostPort,containerIp, containerPort)
-		hostServer(hostPort, fmt.Sprintf("%s:%s", containerIp, containerPort))
+		go hostServer(hostPort, fmt.Sprintf("%s:%s", containerIp, containerPort))
 	}
 	return nil
 }
