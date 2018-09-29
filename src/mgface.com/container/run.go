@@ -3,6 +3,7 @@ package container
 import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
+	"io/ioutil"
 	"mgface.com/aufs"
 	"mgface.com/cgroup"
 	"mgface.com/constVar"
@@ -120,8 +121,13 @@ func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume 
 		//删除挂载点数据
 		aufs.DeleteFileSystem(volume, containerName)
 	} else {
-		logrus.Info("等待3秒为了初始化宿主机监听端口信息等...")
+		logrus.Info("等待3秒为了初始化宿主机监听端口信息,打印出容器初始进程日志等...")
 		time.Sleep(3*time.Second)
+		dirURL := fmt.Sprintf(constVar.DefaultInfoLocation, containerName)
+		stdLogFile := dirURL + constVar.ContainerLog
+		content,_:=ioutil.ReadFile(stdLogFile)
+		fmt.Println("读出容器启动的初始日志:",content)
+
 		logrus.Infof("不启用tty,父进程直接运行完毕,子进程进行detach分离给操作系统的init托管.")
 	}
 }
