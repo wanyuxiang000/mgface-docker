@@ -77,7 +77,7 @@ func pivotRoot(root string) error {
 	}
 	// 创建 rootfs/.pivot_root 存储 old_root
 	pivotDir := filepath.Join(root, ".pivot_root")
-	fmt.Println("pivotDir->", pivotDir)
+	logrus.Infof("pivotDir->%s", pivotDir)
 	if err := os.Mkdir(pivotDir, 0777); err != nil {
 		return err
 	}

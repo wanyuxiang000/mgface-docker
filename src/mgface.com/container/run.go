@@ -87,10 +87,10 @@ func createDefaultBridge(network string) error {
 		if ipface == nil && strings.Contains(err.Error(), "no such network interface") {
 			containerNet.InitNetworkAndNetdriver()
 			containerNet.CreateNetwork(BridgeType, Subnet, BridgeName)
-			logrus.Info("创建%s网桥设备.", BridgeName)
+			logrus.Infof("创建%s网桥设备.", BridgeName)
 			return nil
 		}
-		fmt.Printf("存在%s网桥设备,不再重复创建.\n", BridgeName)
+		logrus.Infof("存在%s网桥设备,不再重复创建.", BridgeName)
 		return nil
 	}
 	return nil
