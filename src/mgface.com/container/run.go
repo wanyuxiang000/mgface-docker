@@ -117,7 +117,6 @@ func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume 
 	//设置Cgroup
 	cgroup.SetCgroup(fmt.Sprintf(CgroupName, containerName), res, pid)
 
-
 	logrus.Info("**************开始配置网络**************")
 	//设置容器连接网络
 	if network == "" {
@@ -126,13 +125,13 @@ func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume 
 	//初始化容器网络和驱动
 	containerNet.InitNetworkAndNetdriver()
 
-	containerInfo := &containerInfo.ContainerInfo{
+	cinfo := &containerInfo.ContainerInfo{
 		Id:          id,
 		Pid:         strconv.Itoa(pid),
 		Name:        containerName,
 		PortMapping: portMapping,
 	}
-	if err := containerNet.Connect(network, containerInfo, tty); err != nil {
+	if err := containerNet.Connect(network, cinfo, tty); err != nil {
 		logrus.Fatal("配置网络发生错误:%s", err.Error())
 		os.Exit(-1)
 	}
