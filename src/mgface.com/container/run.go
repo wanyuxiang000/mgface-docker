@@ -6,9 +6,10 @@ import (
 	"io/ioutil"
 	"mgface.com/aufs"
 	"mgface.com/cgroup"
-	"mgface.com/constVar"
+	. "mgface.com/constVar"
 	"mgface.com/containerInfo"
 	"mgface.com/containerNet"
+	"net"
 	"os"
 	"os/exec"
 	"strconv"
@@ -42,9 +43,9 @@ func newParentProcess(tty bool, volume string, containerName string, envs []stri
 		cmd.Stderr = os.Stderr
 	} else {
 		//创建输出日志的目录和文件
-		dirURL := fmt.Sprintf(constVar.DefaultInfoLocation, containerName)
+		dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)
 		os.MkdirAll(dirURL, 0622)
-		stdLogFile := dirURL + constVar.ContainerLog
+		stdLogFile := dirURL + ContainerLog
 		stdout, _ := os.Create(stdLogFile)
 		logrus.Infof("生成容器:%s的日志文件:%s", containerName, stdLogFile)
 		cmd.Stdout = stdout
@@ -54,7 +55,7 @@ func newParentProcess(tty bool, volume string, containerName string, envs []stri
 	cmd.ExtraFiles = []*os.File{r}
 
 	//设置cmd的目录
-	cmd.Dir = fmt.Sprintf(constVar.Cmd, containerName)
+	cmd.Dir = fmt.Sprintf(Cmd, containerName)
 
 	//设置环境变量
 	//默认情况下,新启动进程的环境变量都是继承于原来父进程的,但是如果手动指定了环境变量,那么就会覆盖掉原来继承自父进程的变量。由于在容器的进程中，
@@ -74,7 +75,33 @@ func sendInitCommand(comArray []string, writePipe *os.File) {
 	writePipe.Close()
 }
 
+func createDefaultBridge(network string) error {
+
+	if network != "" {
+		ipface, _ := net.InterfaceByName(network)
+		if ipface == nil {
+			return fmt.Errorf("网络设备 %s 不存在", network)
+		}
+	} else {
+		ipface, err := net.InterfaceByName(BridgeName)
+		if ipface == nil && strings.Contains(err.Error(), "no such network interface") {
+			containerNet.InitNetworkAndNetdriver()
+			containerNet.CreateNetwork(BridgeType, Subnet, BridgeName)
+			logrus.Info("创建%s网桥设备.", BridgeName)
+			return nil
+		}
+		fmt.Printf("存在%s网桥设备,不再重复创建.\n", BridgeName)
+		return nil
+	}
+	return nil
+}
+
 func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume string, containerName string, envs []string, network string, portMapping []string) {
+	//创建默认网桥
+	if err := createDefaultBridge(network); err != nil {
+		logrus.Fatal("网桥配置发生错误:%s", err.Error())
+		return
+	}
 	//获取容器名称
 	containerName, id := containerInfo.GetContainerName(containerName)
 	//当前进程创建容器的父进程
@@ -88,26 +115,28 @@ func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume 
 	containerInfo.RecordContainerInfo(pid, command, containerName, id, volume)
 
 	//设置Cgroup
-	cgroup.SetCgroup(fmt.Sprintf(constVar.CgroupName, containerName), res, pid)
+	cgroup.SetCgroup(fmt.Sprintf(CgroupName, containerName), res, pid)
 
+
+	logrus.Info("**************开始配置网络**************")
 	//设置容器连接网络
-	if network != "" {
-		//初始化容器网络和驱动
-		containerNet.InitNetworkAndNetdriver()
-
-		containerInfo := &containerInfo.ContainerInfo{
-			Id:          id,
-			Pid:         strconv.Itoa(pid),
-			Name:        containerName,
-			PortMapping: portMapping,
-		}
-		logrus.Info("**************开始配置网络**************")
-		if err := containerNet.Connect(network, containerInfo, tty); err != nil {
-			logrus.Fatal("配置网络发生错误:%s", err.Error())
-			os.Exit(-1)
-		}
-		logrus.Info("**************结束[end]配置网络**************")
+	if network == "" {
+		network = BridgeName
 	}
+	//初始化容器网络和驱动
+	containerNet.InitNetworkAndNetdriver()
+
+	containerInfo := &containerInfo.ContainerInfo{
+		Id:          id,
+		Pid:         strconv.Itoa(pid),
+		Name:        containerName,
+		PortMapping: portMapping,
+	}
+	if err := containerNet.Connect(network, containerInfo, tty); err != nil {
+		logrus.Fatal("配置网络发生错误:%s", err.Error())
+		os.Exit(-1)
+	}
+	logrus.Info("**************结束[end]配置网络**************")
 
 	//向容器进程进行通信
 	sendInitCommand(command, writePipe)
@@ -124,8 +153,8 @@ func RunContainer(tty bool, command []string, res *cgroup.ResouceConfig, volume 
 	} else {
 		logrus.Info("等待3秒为了初始化宿主机监听端口信息,打印出容器初始进程日志等...")
 		time.Sleep(3 * time.Second)
-		dirURL := fmt.Sprintf(constVar.DefaultInfoLocation, containerName)
-		stdLogFile := dirURL + constVar.ContainerLog
+		dirURL := fmt.Sprintf(DefaultInfoLocation, containerName)
+		stdLogFile := dirURL + ContainerLog
 		content, _ := ioutil.ReadFile(stdLogFile)
 		fmt.Println("读出容器启动的初始日志:\n", string(content))
 

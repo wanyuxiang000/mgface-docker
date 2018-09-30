@@ -61,16 +61,16 @@ func (driver *BridgeNetworkDriver) Connect(network *Network, endpoint *Endpoint)
 		PeerName:  "cif-" + la.Name,
 	}
 	//调用 netlink 的 LinkAdd 方法创建出这个 Veth 接口
-	//因为上面指定了link的MasterIndex是网络对应的Linux Bridge
-	//所以 Veth 的一端就己经挂载到了网络对应的 Linux Bridge 上
+	//因为上面指定了link的MasterIndex是网络对应的Linux BridgeType
+	//所以 Veth 的一端就己经挂载到了网络对应的 Linux BridgeType 上
 	if err = netlink.LinkAdd(&endpoint.Device); err != nil {
-		return fmt.Errorf("Error Add Endpoint Device: %v", err)
+		return fmt.Errorf("错误的添加Veth接口: %v", err)
 	}
 	//调用 netlink 的 LinkSetUp 方法，设置 Veth 启动
 	//相当于 ip link set xxx up 命令
 	log.Info("启动Veth接口.")
 	if err = netlink.LinkSetUp(&endpoint.Device); err != nil {
-		return fmt.Errorf("Error Add Endpoint Device: %v", err)
+		return fmt.Errorf("错误启动Veth接口: %v", err)
 	}
 	return nil
 }
@@ -80,7 +80,7 @@ func (driver *BridgeNetworkDriver) Disconnect(network Network, endpoint *Endpoin
 }
 
 func (driver *BridgeNetworkDriver) initBridge(network *Network) error {
-	log.Info("1. 创建 Bridge 虚拟设备.")
+	log.Info("1. 创建 BridgeType 虚拟设备.")
 	bridgeName := network.Name
 	if err := createBridgeInterface(bridgeName); err != nil {
 		return fmt.Errorf("错误的添加bridge： %s, Error: %v", bridgeName, err)
@@ -114,17 +114,17 @@ func (driver *BridgeNetworkDriver) initBridge(network *Network) error {
 func createBridgeInterface(bridgeName string) error {
 
 	ipface, err := net.InterfaceByName("docker0")
-	if ipface!=nil {
+	if ipface != nil {
 		return errors.New("docker0设备存在,存在网络配置驱动冲突,请卸载docker/或者检查iptables策略.")
 	}
-	//先检查是否己经存在了这个同名的 Bridge 设备
+	//先检查是否己经存在了这个同名的 BridgeType 设备
 	ipface, err = net.InterfaceByName(bridgeName)
 	//如果已经存在或者报错则返回创建错误
 	if ipface != nil {
 		return errors.New("设备存在.创建失败.")
 	}
 	if err != nil && !strings.Contains(err.Error(), "no such network interface") {
-		log.Errorf("创建网桥设备出错:%+v",err)
+		log.Errorf("创建网桥设备出错:%+v", err)
 		return err
 	}
 
@@ -136,7 +136,7 @@ func createBridgeInterface(bridgeName string) error {
 	//调用netlink的Linkadd方法,创建Bridge虚拟网络设备
 	//netLink的Linkadd方法是用来创建虚拟网络设备的,相当于ip link add xxxx
 	if err := netlink.LinkAdd(bridge); err != nil {
-		return fmt.Errorf("Bridge %s 创建失败: %v", bridgeName, err)
+		return fmt.Errorf("BridgeType %s 创建失败: %v", bridgeName, err)
 	}
 	return nil
 }

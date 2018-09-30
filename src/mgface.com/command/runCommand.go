@@ -54,7 +54,7 @@ var flag = []cli.Flag{
 
 var RunCommand = cli.Command{
 	Name:  "run",
-	Usage: "创建一个容器使用cgroup和namespace,指令为docker run -it [command]",
+	Usage: "示例指令:docker run -it|-d --name mynginx -v /root/abc:/abc -net mgface0 -p 8989:8989 镜像文件系统(mginx) 后台运行命令(nginx)",
 	Flags: flag,
 	Action: func(ctx *cli.Context) error {
 
@@ -104,6 +104,5 @@ var RunCommand = cli.Command{
 		return nil
 	},
 
-	//todo 还需要让用户指定使用哪个镜像文件  已经做完
 	//todo 配置默认的网桥  run启动的时候默认使用
 }

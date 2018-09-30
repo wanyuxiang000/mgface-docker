@@ -25,4 +25,10 @@ const (
 	DefaultNetworkPath = "/var/run/mgface-docker-net/network/"
 	//IP4开启转发
 	IP4Forward = "/proc/sys/net/ipv4/ip_forward"
+
+
+	//网桥配置
+	BridgeType = "bridge"
+	Subnet     = "172.18.0.0/24"
+	BridgeName = "mgface0"
 )
