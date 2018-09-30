@@ -4,6 +4,7 @@
 mgface-docker golang实现docker的功能
 
 #### 软件架构
+<pre><code>
 ├── aufs
 │   ├── deleteFileSystem.go
 │   └── newFileSystem.go
@@ -56,17 +57,19 @@ mgface-docker golang实现docker的功能
 ├── main.go
 ├── nsenter
 │   └── setns.go
-
+</code></pre>
 
 #### 安装教程
 
 1. 首先要下载golang并且安装
 2. 下载该代码
 3. 设置环境变量
+    <pre><code>
    export GOROOT=/usr/local/go
    export GOPATH=/usr/local/goproject/mgface-docker
    export APP=$GOPATH/bin
    export PATH=$APP:$PATH:$GOPATH:$GOROOT/bin
+   </code></pre>
 
 #### 使用说明
 
