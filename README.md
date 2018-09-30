@@ -1,23 +1,76 @@
 # mgface-docker
 
 #### 项目介绍
-mgface-docker go实现
+mgface-docker golang实现docker的功能
 
 #### 软件架构
-软件架构说明
+├── aufs
+│   ├── deleteFileSystem.go
+│   └── newFileSystem.go
+├── cgroup
+│   ├── cgroupManager.go
+│   ├── cgroupTools.go
+│   ├── cpu.go
+│   ├── cpuset.go
+│   ├── memory.go
+│   └── resouceConfig.go
+├── command
+│   ├── commitCommand.go
+│   ├── execCommand.go
+│   ├── initCommand.go
+│   ├── listCommand.go
+│   ├── logCommand.go
+│   ├── networkCommand.go
+│   ├── rmCommand.go
+│   ├── runCommand.go
+│   ├── startCommand.go
+│   └── stopCommand.go
+├── constVar
+│   └── constVariables.go
+├── container
+│   ├── commit.go
+│   ├── exec.go
+│   ├── init.go
+│   ├── logs.go
+│   ├── ps.go
+│   ├── rm.go
+│   ├── run.go
+│   ├── start.go
+│   └── stop.go
+├── containerInfo
+│   ├── containerInfo.go
+│   ├── randStringBuffer.go
+│   └── randStringBuffer_test.go
+├── containerNet
+│   ├── bridgeDriver.go
+│   ├── driver.go
+│   ├── golang daemon实现.md
+│   ├── hostPortUp.go
+│   ├── init.go
+│   ├── ipam.go
+│   ├── ipam_test.go
+│   ├── network.go
+│   └── networkTools.go
+├── Gopkg.lock
+├── Gopkg.toml
+├── main.go
+├── nsenter
+│   └── setns.go
 
 
 #### 安装教程
 
-1. xxxx
-2. xxxx
-3. xxxx
+1. 首先要下载golang并且安装
+2. 下载该代码
+3. 设置环境变量
+   export GOROOT=/usr/local/go
+   export GOPATH=/usr/local/goproject/mgface-docker
+   export APP=$GOPATH/bin
+   export PATH=$APP:$PATH:$GOPATH:$GOROOT/bin
 
 #### 使用说明
 
-1. xxxx
-2. xxxx
-3. xxxx
+1. mgface.com --help
 
 #### 参与贡献
 
