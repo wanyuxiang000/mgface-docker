@@ -15,7 +15,7 @@ var CommitCommand = cli.Command{
 		}
 		containerName := context.Args().Get(0)
 		imageName := context.Args().Get(1)
-		container.CommitContainer(containerName,imageName)
+		container.CommitContainer(containerName, imageName)
 		return nil
 	},
 }

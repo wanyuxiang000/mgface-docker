@@ -18,4 +18,3 @@ var LogCommand = cli.Command{
 		return nil
 	},
 }
-

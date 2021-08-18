@@ -43,9 +43,9 @@ var NetworkCommand = cli.Command{
 			},
 		},
 		{
-			Name:      "remove",
-			ShortName: "rm",
-			Usage:     "移除网络",
+			Name:        "remove",
+			ShortName:   "rm",
+			Usage:       "移除网络",
 			Description: "查看iptables配置的MASQUERADE规则[iptables -t nat -vnL POSTROUTING]",
 			Action: func(context *cli.Context) error {
 				if len(context.Args()) < 1 {
