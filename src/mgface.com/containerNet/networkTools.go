@@ -2,7 +2,7 @@ package containerNet
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
 	"mgface.com/containerInfo"
@@ -103,7 +103,7 @@ func configEndpointIpAddressAndRoute(endpoint *Endpoint, containerInfo *containe
 	return nil
 }
 
-func Connect(networkName string, containerInfo *containerInfo.ContainerInfo,tty bool) error {
+func Connect(networkName string, containerInfo *containerInfo.ContainerInfo, tty bool) error {
 	network, ok := networks[networkName]
 	if !ok {
 		return fmt.Errorf("没有找到匹配的Network: %s", networkName)
@@ -131,11 +131,11 @@ func Connect(networkName string, containerInfo *containerInfo.ContainerInfo,tty 
 		return err
 	}
 	logrus.Info("配置端口映射信息.")
-	return configPortMapping(endpoint,tty)
+	return configPortMapping(endpoint, tty)
 }
 
 //配置端口映射
-func configPortMapping(endpoint *Endpoint,tty bool) error {
+func configPortMapping(endpoint *Endpoint, tty bool) error {
 	//遍历容器端口映射列表
 	for _, pm := range endpoint.PortMapping {
 		//分成宿主机的端口和容器的端口
@@ -145,9 +145,9 @@ func configPortMapping(endpoint *Endpoint,tty bool) error {
 			continue
 		}
 		logrus.Info("在iptables的PREROUTING中添加DNAT规则,将宿主机的端口请求转发到容器的地址和端口上.")
-		hostPort:=portMapping[0]
-		containerIp:=endpoint.IPAddress.String()
-		containerPort:= portMapping[1]
+		hostPort := portMapping[0]
+		containerIp := endpoint.IPAddress.String()
+		containerPort := portMapping[1]
 		iptablesCmd := fmt.Sprintf("-t nat -A PREROUTING -p tcp -m tcp --dport %s -j DNAT --to-destination %s:%s",
 			hostPort, containerIp, containerPort)
 		logrus.Infof("端口映射命令:%s", iptablesCmd)
@@ -158,8 +158,8 @@ func configPortMapping(endpoint *Endpoint,tty bool) error {
 			logrus.Errorf("iptables Output, %v", output)
 			continue
 		}
-		logrus.Infof("在宿主机启动相应的端口做转发.宿主机端口:%s,容器的地址:%s:%s", hostPort,containerIp, containerPort)
-		go hostServer(hostPort, fmt.Sprintf("%s:%s", containerIp, containerPort),tty)
+		logrus.Infof("在宿主机启动相应的端口做转发.宿主机端口:%s,容器的地址:%s:%s", hostPort, containerIp, containerPort)
+		go hostServer(hostPort, fmt.Sprintf("%s:%s", containerIp, containerPort), tty)
 	}
 	return nil
 }

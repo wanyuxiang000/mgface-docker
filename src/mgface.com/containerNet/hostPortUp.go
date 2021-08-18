@@ -2,7 +2,7 @@ package containerNet
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"io"
 	"net"
 	"runtime"
@@ -15,9 +15,9 @@ import "C"
 
 //houstport是宿主机的端口,作为对外代理的端口
 //containerIp 容器的IP地址和端口
-func hostServer(hostport string, containerIp string,tty bool) {
+func hostServer(hostport string, containerIp string, tty bool) {
 	//假如没开启tty终端的话，那么是后台启动
-	if !tty{
+	if !tty {
 		logrus.Info("通过Cgo来实现监听tcp的daemon实现")
 		//设置守护进程
 		C.daemon(1, 1)
@@ -53,7 +53,6 @@ func handle(sconn net.Conn, ip string) {
 		logrus.Infof("往%+v发送数据失败:%+v\n", ip, err)
 		ExitChan <- true
 	}(sconn, dconn, ExitChan)
-
 
 	go func(sconn net.Conn, dconn net.Conn, Exit chan bool) {
 		_, err := io.Copy(sconn, dconn)

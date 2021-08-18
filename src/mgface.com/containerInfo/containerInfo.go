@@ -3,7 +3,7 @@ package containerInfo
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"mgface.com/constVar"
 	"os"
@@ -13,18 +13,16 @@ import (
 )
 
 type ContainerInfo struct {
-	Pid         string `json:"pid"`         //容器init进程在宿主机的PID
-	Id          string `json:"id"`          //容器ID
-	Name        string `json:"name"`        //容器名称
-	Command     string `json:"command"`     //容器内init进程的执行命令
-	CreatedTime string `json:"createdTime"` //创建时间
-	StoppedTime string `json:"stoppedTime"` //停止时间
-	Status      string `json:"status"`      //容器状态
-	Volume      string `json:"volume"`      //挂载卷
+	Pid         string   `json:"pid"`         //容器init进程在宿主机的PID
+	Id          string   `json:"id"`          //容器ID
+	Name        string   `json:"name"`        //容器名称
+	Command     string   `json:"command"`     //容器内init进程的执行命令
+	CreatedTime string   `json:"createdTime"` //创建时间
+	StoppedTime string   `json:"stoppedTime"` //停止时间
+	Status      string   `json:"status"`      //容器状态
+	Volume      string   `json:"volume"`      //挂载卷
 	PortMapping []string `json:"portmapping"` //端口映射
 }
-
-
 
 func GetContainerName(containerName string) (string, string) {
 	id := randStringBuffer(10)
@@ -76,7 +74,7 @@ func RecordContainerInfo(containerPID int, commandArray []string, containerName 
 	file, _ := os.Create(fileName)
 	defer file.Close()
 	jsonBytes, _ := json.MarshalIndent(containerInfo, "", "   ") //美化输出缩进格式
-	content := append(jsonBytes,[]byte("\n")...)
+	content := append(jsonBytes, []byte("\n")...)
 	file.Write(content)
 	return containerName, nil
 }

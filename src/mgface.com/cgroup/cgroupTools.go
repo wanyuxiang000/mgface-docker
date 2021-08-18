@@ -3,7 +3,7 @@ package cgroup
 import (
 	"bufio"
 	"fmt"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"os"
 	"path"
 	"strings"

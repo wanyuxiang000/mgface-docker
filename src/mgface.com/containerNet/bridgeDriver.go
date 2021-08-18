@@ -3,7 +3,7 @@ package containerNet
 import (
 	"errors"
 	"fmt"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 	"mgface.com/constVar"
 	"net"

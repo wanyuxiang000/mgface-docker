@@ -3,7 +3,7 @@ package aufs
 import (
 	"errors"
 	"fmt"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"mgface.com/constVar"
 	"os"

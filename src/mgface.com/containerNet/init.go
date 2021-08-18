@@ -2,7 +2,7 @@ package containerNet
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	. "mgface.com/constVar"
 	"net"
 	"os"
@@ -66,9 +66,9 @@ func DeleteNetwork(networkName string) error {
 	network, ok := networks[networkName]
 	if !ok {
 		return fmt.Errorf("没有匹配到Network: %s", networkName)
-	}else {
+	} else {
 		//删除子网络
-		delete(networks,networkName)
+		delete(networks, networkName)
 	}
 
 	if err := ipAddressManage.Release(network.IpNet, &network.IpNet.IP); err != nil {
@@ -80,7 +80,7 @@ func DeleteNetwork(networkName string) error {
 	}
 	//删除ipam数据
 	_, subnet, _ := net.ParseCIDR(network.IpNet.String())
-	delete(*ipAddressManage.Subnets,subnet.String())
+	delete(*ipAddressManage.Subnets, subnet.String())
 	ipAddressManage.dump()
 	//移除subnet子网络文件
 	return network.remove(DefaultNetworkPath)

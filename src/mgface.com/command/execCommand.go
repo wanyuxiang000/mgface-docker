@@ -2,7 +2,7 @@ package command
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"mgface.com/container"
 	"os"

@@ -2,7 +2,7 @@ package aufs
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"mgface.com/constVar"
 	"os"
 	"os/exec"
